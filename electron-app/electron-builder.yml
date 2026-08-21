@@ -1,0 +1,21 @@
+appId: com.fabaotong.desktop
+productName: 法保通
+copyright: Copyright © 2026 FaBaoTong
+directories:
+  output: release
+  buildResources: build
+files:
+  - main.js
+  - "!node_modules"
+win:
+  target:
+    - target: nsis
+      arch:
+        - x64
+  icon: icon.png
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  shortcutName: 法保通
+  uninstallDisplayName: 法保通 - 卸载

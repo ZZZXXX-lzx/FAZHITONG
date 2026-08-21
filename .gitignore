@@ -1,0 +1,52 @@
+# ===== Java / Maven =====
+target/
+*.class
+*.jar
+*.war
+*.ear
+*.log
+hs_err_pid*
+
+# ===== Node.js / Frontend =====
+node_modules/
+dist/
+.npm/
+*.local
+
+# ===== IDE =====
+.vscode/
+.idea/
+*.iml
+*.swp
+*.swo
+*.swp
+.project
+.classpath
+.settings/
+.factorypath
+
+# ===== OS =====
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ===== Android / Capacitor =====
+frontend/pc-portal/android/app/build/
+frontend/pc-portal/android/app/src/main/assets/public/
+frontend/pc-portal/android/capacitor-cordova-android-plugins/
+*.apk
+*.aab
+
+# ===== Environment & Secrets =====
+.env
+*.env.local
+application-local.yml
+
+# ===== Uploads =====
+uploads/
+
+# ===== Misc =====
+release/
+*.tmp
+*.bak
+*.cache

@@ -1,0 +1,13 @@
+/* Mobile responsive overrides */
+@media (max-width: 768px) {
+  .el-card { border-radius: 0 !important; border-left: none !important; border-right: none !important; }
+  .el-dialog { width: 92% !important; max-width: 92% !important; }
+  .el-form--inline .el-form-item { margin-right: 0 !important; display: block !important; }
+  .el-form--inline .el-form-item .el-input { width: 100% !important; }
+  .el-table { font-size: 13px !important; }
+  .el-pagination { white-space: normal !important; }
+  .el-page-header { padding: 12px !important; }
+  .page-header { padding: 16px !important; }
+  .page-header h2 { font-size: 20px !important; }
+  .el-progress { min-width: 60px !important; }
+}
