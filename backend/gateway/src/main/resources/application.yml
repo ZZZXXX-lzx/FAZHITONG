@@ -43,4 +43,4 @@ gateway:
 
 logging:
   level:
-    com.fabaotong: DEBUG
+    com.fazhitong: DEBUG

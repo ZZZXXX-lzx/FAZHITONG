@@ -11,11 +11,11 @@
         <relativePath/>
     </parent>
 
-    <groupId>com.fabaotong</groupId>
-    <artifactId>fabaotong-backend</artifactId>
+    <groupId>com.fazhitong</groupId>
+    <artifactId>fazhitong-backend</artifactId>
     <version>1.0.0</version>
     <packaging>pom</packaging>
-    <name>法保通法律服务平台后端</name>
+    <name>法智通法律服务平台后端</name>
 
     <modules>
         <module>common</module>

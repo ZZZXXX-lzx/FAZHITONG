@@ -1,8 +1,8 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'com.fabaotong.app',
-  appName: '法保通',
+  appId: 'com.fazhitong.app',
+  appName: '法智通',
   webDir: 'dist',
   server: {
     cleartext: true,

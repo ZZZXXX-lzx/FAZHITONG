@@ -7,7 +7,7 @@
         </button>
         <div class="logo" @click="$router.push('/')">
           <span class="logo-icon">⚖️</span>
-          <span class="logo-text">法保通</span>
+          <span class="logo-text">法智通</span>
         </div>
         <nav class="main-nav" :class="{ open: menuOpen }">
           <router-link to="/" @click="menuOpen = false">首页</router-link>
@@ -57,7 +57,7 @@
     </main>
     <footer class="site-footer">
       <div class="footer-inner">
-        <p>© 2026 法保通 - 让每家企业都拥有自己的法务部</p>
+        <p>© 2026 法智通 - 让每家企业都拥有自己的法务部</p>
       </div>
     </footer>
   </div>

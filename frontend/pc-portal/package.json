@@ -1,5 +1,5 @@
 {
-  "name": "fabaotong-pc-portal",
+  "name": "fazhitong-pc-portal",
   "version": "1.0.0",
   "private": true,
   "type": "module",
@@ -14,8 +14,8 @@
     "electron:run": "npx electron ."
   },
   "build": {
-    "appId": "com.fabaotong.portal",
-    "productName": "法保通",
+    "appId": "com.fazhitong.portal",
+    "productName": "法智通",
     "directories": {
       "output": "release"
     },
@@ -39,8 +39,8 @@
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
-      "shortcutName": "法保通",
-      "uninstallDisplayName": "法保通"
+      "shortcutName": "法智通",
+      "uninstallDisplayName": "法智通"
     },
     "extraMetadata": {
       "main": "electron/main.cjs"

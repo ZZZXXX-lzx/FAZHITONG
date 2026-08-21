@@ -68,10 +68,12 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { consultationApi } from '@/api'
 import { useUserStore } from '@/store/user'
 
+const router = useRouter()
 const userStore = useUserStore()
 const question = ref('')
 const aiAnswer = ref('')
@@ -88,15 +90,25 @@ onMounted(() => {
 })
 
 async function askAI() {
-  if (!question.value) return
+  if (!userStore.isLoggedIn) {
+    ElMessage.warning('请先登录后使用 AI 咨询')
+    router.push('/login')
+    return
+  }
+  if (!question.value.trim()) {
+    ElMessage.warning('请输入您要咨询的问题')
+    return
+  }
   aiLoading.value = true
   try {
-    await consultationApi.create({ userId: userStore.userInfo.userId || 0, title: 'AI咨询', question: question.value, type: 'AI' })
+    const data = await consultationApi.create({ userId: userStore.userInfo.userId, title: 'AI咨询', question: question.value, type: 'AI' })
+    aiAnswer.value = data?.answer || '暂未生成回复，请稍后重试'
+    loadMyConsultations()
   } catch {
     ElMessage.error('提交失败，请稍后重试')
+  } finally {
+    aiLoading.value = false
   }
-  aiAnswer.value = '您好，我是法保通AI法律顾问。根据您描述的问题，初步分析如下：\n\n1. 该情况涉及《中华人民共和国民法典》相关规定\n2. 建议您收集相关证据材料\n3. 如需进一步帮助，请联系专业律师\n\n（此为AI生成的参考意见，不构成正式法律意见）'
-  aiLoading.value = false
 }
 
 async function loadMyConsultations() {

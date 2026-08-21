@@ -30,7 +30,7 @@
 import { reactive } from 'vue'
 
 const config = reactive({
-  platformName: '法保通法律服务平台',
+  platformName: '法智通法律服务平台',
   servicePhone: '400-xxx-xxxx',
   aiModel: 'deepseek',
   registerMethods: ['手机号注册'],

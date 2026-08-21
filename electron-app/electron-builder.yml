@@ -1,6 +1,6 @@
-appId: com.fabaotong.desktop
-productName: 法保通
-copyright: Copyright © 2026 FaBaoTong
+appId: com.fazhitong.desktop
+productName: 法智通
+copyright: Copyright © 2026 FaZhiTong
 directories:
   output: release
   buildResources: build
@@ -17,5 +17,5 @@ nsis:
   oneClick: false
   allowToChangeInstallationDirectory: true
   createDesktopShortcut: true
-  shortcutName: 法保通
-  uninstallDisplayName: 法保通 - 卸载
+  shortcutName: 法智通
+  uninstallDisplayName: 法智通 - 卸载

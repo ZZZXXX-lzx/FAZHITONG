@@ -5,7 +5,7 @@
   <el-container v-else class="admin-layout">
     <el-aside width="220px" class="admin-sidebar">
       <div class="sidebar-logo" @click="$router.push('/')">
-        <span>⚖️ 法保通</span>
+        <span>⚖️ 法智通</span>
       </div>
       <el-menu router :default-active="route.path" background-color="#1a1a2e" text-color="#fff" active-text-color="#409eff">
         <el-menu-item index="/">

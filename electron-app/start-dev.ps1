@@ -1,10 +1,10 @@
-# 法保通开发环境启动脚本
+# 法智通开发环境启动脚本
 # 需要：Java 17+, Node.js, MySQL
 
 $rootDir = Split-Path -Parent $PSScriptRoot
 
 Write-Host "╔════════════════════════════════════════╗" -ForegroundColor Cyan
-Write-Host "║      法保通 - 法律服务平台启动脚本     ║" -ForegroundColor Cyan
+Write-Host "║      法智通 - 法律服务平台启动脚本     ║" -ForegroundColor Cyan
 Write-Host "╚════════════════════════════════════════╝" -ForegroundColor Cyan
 Write-Host ""
 

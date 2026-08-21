@@ -10,8 +10,8 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.svg', 'pwa-192x192.svg', 'pwa-512x512.svg'],
       manifest: {
-        name: '法保通 - 智能法律服务平台',
-        short_name: '法保通',
+        name: '法智通 - 智能法律服务平台',
+        short_name: '法智通',
         description: 'AI驱动的一站式法律解决方案',
         theme_color: '#1a56db',
         background_color: '#1a56db',

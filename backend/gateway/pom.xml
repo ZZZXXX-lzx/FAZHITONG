@@ -4,8 +4,8 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>com.fabaotong</groupId>
-        <artifactId>fabaotong-backend</artifactId>
+        <groupId>com.fazhitong</groupId>
+        <artifactId>fazhitong-backend</artifactId>
         <version>1.0.0</version>
     </parent>
     <artifactId>gateway</artifactId>
@@ -16,7 +16,7 @@
             <artifactId>spring-cloud-starter-gateway</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.fabaotong</groupId>
+            <groupId>com.fazhitong</groupId>
             <artifactId>common</artifactId>
             <version>1.0.0</version>
             <exclusions>

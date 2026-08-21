@@ -24,7 +24,7 @@ const router = createRouter({
 
 router.beforeEach((to, from, next) => {
   const adminStore = useAdminStore()
-  document.title = to.meta.title ? `${to.meta.title} - 法保通管理后台` : '法保通管理后台'
+  document.title = to.meta.title ? `${to.meta.title} - 法智通管理后台` : '法智通管理后台'
   if (to.meta.requiresAuth && !adminStore.isLoggedIn) {
     next('/login')
   } else if (to.path === '/login' && adminStore.isLoggedIn) {

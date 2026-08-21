@@ -1,7 +1,7 @@
 <template>
   <div class="register-page">
     <div class="register-card">
-      <h2 class="register-title">法保通注册</h2>
+      <h2 class="register-title">法智通注册</h2>
       <el-form :model="form" :rules="rules" ref="formRef" size="large">
         <el-form-item prop="account">
           <el-input v-model="form.account" placeholder="请输入账号" prefix-icon="User" />

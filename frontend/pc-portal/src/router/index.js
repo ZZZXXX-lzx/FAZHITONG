@@ -39,7 +39,7 @@ const router = createRouter({
 })
 
 router.beforeEach((to, from, next) => {
-  document.title = to.meta.title ? `${to.meta.title} - 法保通` : '法保通 - 智能法律服务平台'
+  document.title = to.meta.title ? `${to.meta.title} - 法智通` : '法智通 - 智能法律服务平台'
 
   const userStore = useUserStore()
 

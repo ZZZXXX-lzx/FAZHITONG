@@ -1,7 +1,7 @@
 <template>
   <div class="login-page">
     <div class="login-card">
-      <h2 class="login-title">法保通登录</h2>
+      <h2 class="login-title">法智通登录</h2>
       <el-form :model="form" :rules="rules" ref="formRef" size="large">
         <el-form-item prop="account">
           <el-input v-model="form.account" placeholder="请输入账号" prefix-icon="User" />

@@ -1,7 +1,7 @@
 {
-  "name": "fabaotong-desktop",
+  "name": "fazhitong-desktop",
   "version": "1.0.0",
-  "description": "法保通智能法律服务平台 - 桌面应用",
+  "description": "法智通智能法律服务平台 - 桌面应用",
   "main": "main.js",
   "scripts": {
     "dev:portal": "electron . --mode=portal",
@@ -9,7 +9,7 @@
     "build": "electron-builder",
     "build:portal": "electron-builder --config electron-builder.yml"
   },
-  "author": "FaBaoTong",
+  "author": "FaZhiTong",
   "license": "MIT",
   "devDependencies": {
     "electron": "^33.4.11",
