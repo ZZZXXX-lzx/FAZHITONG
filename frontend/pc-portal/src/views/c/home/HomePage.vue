@@ -70,6 +70,7 @@ const features = [
   { icon: '📝', title: '文书生成', desc: 'AI智能生成起诉状、答辩状等法律文书', path: '/documents' },
   { icon: '💬', title: '法律咨询', desc: '7×15小时在线咨询，5分钟快速响应', path: '/consultation' },
   { icon: '🔍', title: '案例检索', desc: '千万级裁判文书智能检索', path: '/cases' },
+  { icon: '📖', title: '法规检索', desc: '法律法规、司法解释快速查询', path: '/regulations' },
   { icon: '📋', title: '合同模板', desc: '海量合同模板一键套用', path: '/templates' },
   { icon: '📚', title: '法律知识库', desc: '法律法规、法律常识、专业解读', path: '/knowledge' },
   { icon: '👨‍⚖️', title: '找律师', desc: '认证律师大厅，按专长精准匹配', path: '/lawyers' },

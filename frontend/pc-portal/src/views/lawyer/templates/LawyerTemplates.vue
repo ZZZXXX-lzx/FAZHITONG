@@ -31,10 +31,8 @@
 <script setup>
 import { ref, reactive } from 'vue'
 import { ElMessage } from 'element-plus'
-import { documentApi } from '@/api'
-import { useUserStore } from '@/store/user'
+import { buildDocx, downloadBlob } from '@/utils/docx'
 
-const userStore = useUserStore()
 const genDialog = ref(false)
 const genLoading = ref(false)
 const selectedType = ref(null)
@@ -58,8 +56,13 @@ function showGenerate(cat) {
 async function handleGenerate() {
   genLoading.value = true
   try {
-    ElMessage.success('AI文书生成成功！请在"我的文书"中查看')
+    const lines = (selectedType.value.fields || []).map(f => `${f}：${genForm[f] || ''}`)
+    const blob = await buildDocx(selectedType.value.name, lines.join('\n'))
+    downloadBlob(blob, `${selectedType.value.name}.docx`)
+    ElMessage.success('文书已生成并下载')
     genDialog.value = false
+  } catch {
+    ElMessage.error('生成失败，请稍后重试')
   } finally {
     genLoading.value = false
   }

@@ -12,6 +12,7 @@ const routes = [
       { path: 'documents/:id', name: 'DocumentDetail', component: () => import('@/views/c/documents/DocumentDetail.vue'), meta: { title: '文书详情' } },
       { path: 'consultation', name: 'Consultation', component: () => import('@/views/c/consultation/ConsultationPage.vue'), meta: { title: '法律咨询' } },
       { path: 'cases', name: 'Cases', component: () => import('@/views/c/cases/CaseSearch.vue'), meta: { title: '案例检索' } },
+      { path: 'regulations', name: 'Regulations', component: () => import('@/views/c/cases/RegulationSearch.vue'), meta: { title: '法规检索' } },
       { path: 'templates', name: 'Templates', component: () => import('@/views/c/templates/TemplateList.vue'), meta: { title: '合同模板' } },
       { path: 'lawyer', name: 'LawyerHome', component: () => import('@/views/lawyer/home/LawyerHome.vue'), meta: { title: '律师工作台', roles: ['LAWYER', 'ADMIN'] } },
       { path: 'lawyer/templates', name: 'LawyerTemplates', component: () => import('@/views/lawyer/templates/LawyerTemplates.vue'), meta: { title: 'AI文书生成', roles: ['LAWYER', 'ADMIN'] } },

@@ -20,6 +20,7 @@ export const documentApi = {
   getTemplate: (id) => request.get(`/document/templates/${id}`),
   generate: (params) => request.post('/document/generate', params.data, { params: { userId: params.userId, templateId: params.templateId } }),
   records: (userId) => request.get('/document/records', { params: { userId } }),
+  aiDraft: (type, description) => request.post('/document/ai-draft', { type, description }),
 }
 
 export const consultationApi = {
@@ -38,11 +39,17 @@ export const contractApi = {
   records: (params) => request.get('/contract/records', { params }),
   enterpriseList: (params) => request.get('/contract/enterprise/list', { params }),
   createEnterprise: (data) => request.post('/contract/enterprise', data),
+  aiReview: (text) => request.post('/contract/ai-review', { text }),
 }
 
 export const caseApi = {
   search: (params) => request.get('/case/search', { params }),
   getById: (id) => request.get(`/case/${id}`),
+}
+
+export const regulationApi = {
+  search: (params) => request.get('/case/regulation/search', { params }),
+  getById: (id) => request.get(`/case/regulation/${id}`),
 }
 
 export const paymentApi = {

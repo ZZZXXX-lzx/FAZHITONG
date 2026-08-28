@@ -52,6 +52,7 @@
     "@capacitor/core": "^8.3.4",
     "@element-plus/icons-vue": "^2.3.0",
     "axios": "^1.6.0",
+    "docx": "^9.7.1",
     "element-plus": "^2.4.0",
     "pinia": "^2.1.0",
     "vue": "^3.4.0",

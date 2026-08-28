@@ -1,0 +1,69 @@
+package com.fazhitong.contract.controller;
+
+import com.fazhitong.common.dto.ApiResult;
+import com.fazhitong.common.dto.PageParam;
+import com.fazhitong.common.dto.PageResult;
+import com.fazhitong.common.exception.BusinessException;
+import com.fazhitong.contract.entity.ContractRecord;
+import com.fazhitong.contract.entity.EnterpriseContract;
+import com.fazhitong.contract.service.ContractService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
+
+@RestController
+@RequestMapping("/contract")
+@RequiredArgsConstructor
+public class ContractController {
+
+    private final ContractService contractService;
+
+    @PostMapping("/upload")
+    public ApiResult<ContractRecord> upload(
+            @RequestParam(required = false) Long userId,
+            @RequestParam(required = false) Long enterpriseId,
+            @RequestParam String title,
+            @RequestParam String fileUrl) {
+        return ApiResult.success(contractService.uploadReview(userId, enterpriseId, title, fileUrl));
+    }
+
+    @PostMapping("/{id}/review")
+    public ApiResult<ContractRecord> review(
+            @PathVariable Long id,
+            @RequestParam String riskReport,
+            @RequestParam String riskLevel) {
+        return ApiResult.success(contractService.reviewResult(id, riskReport, riskLevel));
+    }
+
+    @GetMapping("/records")
+    public ApiResult<PageResult<ContractRecord>> listRecords(
+            @RequestParam(required = false) Long userId,
+            @RequestParam(required = false) Long enterpriseId,
+            PageParam pageParam) {
+        return ApiResult.success(contractService.listRecords(userId, enterpriseId, pageParam));
+    }
+
+    @PostMapping("/enterprise")
+    public ApiResult<EnterpriseContract> createEnterpriseContract(@RequestBody EnterpriseContract contract) {
+        return ApiResult.success(contractService.createEnterpriseContract(contract));
+    }
+
+    @GetMapping("/enterprise/list")
+    public ApiResult<PageResult<EnterpriseContract>> listEnterpriseContracts(
+            @RequestParam Long enterpriseId, PageParam pageParam) {
+        return ApiResult.success(contractService.listEnterpriseContracts(enterpriseId, pageParam));
+    }
+
+    /**
+     * 合同智能审查（传入合同文本，返回风险等级 + 审查报告）
+     */
+    @PostMapping("/ai-review")
+    public ApiResult<Map<String, Object>> aiReview(@RequestBody Map<String, String> body) {
+        String text = body.getOrDefault("text", "");
+        if (text == null || text.isBlank()) {
+            throw new BusinessException("请提供待审查的合同文本");
+        }
+        return ApiResult.success(contractService.aiReview(text));
+    }
+}
