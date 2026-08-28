@@ -12,10 +12,25 @@ set DB_NAME=fazhitong
 set DB_USERNAME=root
 
 echo ========================================
-echo   法智通法律服务平台 - 启动脚本
+echo   法智通法律服务平台 - 一键启动
 echo ========================================
 echo.
 
+REM ---- Step 0: 清理旧进程，释放端口 ----
+echo [0/8] 清理旧进程，释放端口 8080-8087 ...
+powershell -NoProfile -ExecutionPolicy Bypass -Command "$ports=8080..8087; $ids=@(); foreach($p in $ports){ $c=Get-NetTCPConnection -LocalPort $p -State Listen -ErrorAction SilentlyContinue; if($c){ $ids += $c.OwningProcess } }; $ids=@($ids | Sort-Object -Unique); foreach($i in $ids){ Stop-Process -Id $i -Force -ErrorAction SilentlyContinue }"
+timeout /t 2 /nobreak >nul 2>&1
+
+REM ---- 检查编译产物 ----
+if not exist "gateway\target\gateway-1.0.0.jar" (
+    echo.
+    echo [错误] 未找到编译产物，请先双击运行 build.bat 完成打包。
+    echo.
+    pause
+    exit /b 1
+)
+
+echo.
 echo [1/8] 启动 Gateway 网关 (port 8080)...
 start "fazhitong-gateway" cmd /c "cd /d "%~dp0gateway" & java -jar target\gateway-1.0.0.jar"
 timeout /t 5 /nobreak >nul 2>&1
@@ -60,5 +75,7 @@ echo   Contract:       http://localhost:8085
 echo   Case Service:   http://localhost:8086
 echo   Payment:        http://localhost:8087
 echo ========================================
+echo.
+echo   提示：停止所有服务请双击 stop-all.bat
 echo.
 pause

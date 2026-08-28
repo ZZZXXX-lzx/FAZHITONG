@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <!--
+        最外层聚合工程（仅用于 IDEA/Maven 从项目根识别整个工程）。
+        真正的多模块父工程与管理见 backend/pom.xml（com.fazhitong:fazhitong-backend）。
+    -->
+    <groupId>com.fazhitong</groupId>
+    <artifactId>fazhitong</artifactId>
+    <version>1.0.0</version>
+    <packaging>pom</packaging>
+    <name>法智通法律服务平台</name>
+
+    <modules>
+        <module>backend</module>
+    </modules>
+</project>

@@ -18,9 +18,11 @@
         <p>{{ roleWorkspace.desc }}</p>
       </div>
       <el-row :gutter="24">
-        <el-col :span="8" v-for="item in roleWorkspace.items" :key="item.title">
+        <el-col :xs="24" :sm="12" :md="8" v-for="item in roleWorkspace.items" :key="item.title">
           <el-card class="feature-card" shadow="hover" @click="$router.push(item.path)">
-            <div class="feature-icon">{{ item.icon }}</div>
+            <div class="feature-icon" :style="{ background: item.bg, color: item.color }">
+              <el-icon :size="34"><component :is="item.icon" /></el-icon>
+            </div>
             <h3>{{ item.title }}</h3>
             <p>{{ item.desc }}</p>
           </el-card>
@@ -34,9 +36,11 @@
         <p>AI驱动的一站式法律解决方案</p>
       </div>
       <el-row :gutter="24">
-        <el-col :span="6" v-for="item in features" :key="item.title">
+        <el-col :xs="24" :sm="12" :md="8" v-for="item in features" :key="item.title">
           <el-card class="feature-card" shadow="hover" @click="goFeature(item)">
-            <div class="feature-icon">{{ item.icon }}</div>
+            <div class="feature-icon" :style="{ background: item.bg, color: item.color }">
+              <el-icon :size="34"><component :is="item.icon" /></el-icon>
+            </div>
             <h3>{{ item.title }}
               <el-tag v-if="item.premium && !userStore.isLoggedIn" size="small" type="warning" style="vertical-align:middle;margin-left:4px">需登录</el-tag>
             </h3>
@@ -62,31 +66,35 @@ import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/store/user'
 import { ElMessage } from 'element-plus'
+import {
+  Document, ChatDotRound, Search, Notebook, DocumentChecked, Reading,
+  User, Tools, Umbrella, EditPen, Postcard, Files, CircleCheck,
+} from '@element-plus/icons-vue'
 
 const router = useRouter()
 const userStore = useUserStore()
 
 const features = [
-  { icon: '📝', title: '文书生成', desc: 'AI智能生成起诉状、答辩状等法律文书', path: '/documents' },
-  { icon: '💬', title: '法律咨询', desc: '7×15小时在线咨询，5分钟快速响应', path: '/consultation' },
-  { icon: '🔍', title: '案例检索', desc: '千万级裁判文书智能检索', path: '/cases' },
-  { icon: '📖', title: '法规检索', desc: '法律法规、司法解释快速查询', path: '/regulations' },
-  { icon: '📋', title: '合同模板', desc: '海量合同模板一键套用', path: '/templates' },
-  { icon: '📚', title: '法律知识库', desc: '法律法规、法律常识、专业解读', path: '/knowledge' },
-  { icon: '👨‍⚖️', title: '找律师', desc: '认证律师大厅，按专长精准匹配', path: '/lawyers' },
-  { icon: '🛠️', title: '法律工具箱', desc: '诉讼费、利息、工伤赔偿计算器', path: '/toolbox' },
-  { icon: '🤝', title: '法律援助', desc: '为经济困难群众提供免费法律服务', path: '/legal-aid', premium: true },
+  { icon: Document, color: '#1a56db', bg: '#e8effc', title: '文书生成', desc: 'AI智能生成起诉状、答辩状等法律文书', path: '/documents' },
+  { icon: ChatDotRound, color: '#0d9488', bg: '#e0f4f1', title: '法律咨询', desc: '7×15小时在线咨询，5分钟快速响应', path: '/consultation' },
+  { icon: Search, color: '#2563eb', bg: '#e6edfe', title: '案例检索', desc: '千万级裁判文书智能检索', path: '/cases' },
+  { icon: Notebook, color: '#7c3aed', bg: '#f1e9fe', title: '法规检索', desc: '法律法规、司法解释快速查询', path: '/regulations' },
+  { icon: DocumentChecked, color: '#b45309', bg: '#fbf0dd', title: '合同模板', desc: '海量合同模板一键套用', path: '/templates' },
+  { icon: Reading, color: '#0e9f6e', bg: '#e2f6ec', title: '法律知识库', desc: '法律法规、法律常识、专业解读', path: '/knowledge' },
+  { icon: User, color: '#be185d', bg: '#fbe7f0', title: '找律师', desc: '认证律师大厅，按专长精准匹配', path: '/lawyers' },
+  { icon: Tools, color: '#d97706', bg: '#fdf1dd', title: '法律工具箱', desc: '诉讼费、利息、工伤赔偿计算器', path: '/toolbox' },
+  { icon: Umbrella, color: '#c2410c', bg: '#fdeee4', title: '法律援助', desc: '为经济困难群众提供免费法律服务', path: '/legal-aid', premium: true },
 ]
 
 const roleWorkspace = computed(() => {
   const type = userStore.userType
   if (type === 'LAWYER') return { title: '律师工作台', desc: 'AI辅助办案、文书生成、案件管理', items: [
-    { icon: '⚖️', title: 'AI文书生成', desc: '智能生成起诉状、辩护词等', path: '/lawyer/templates' },
-    { icon: '📋', title: '律师资料', desc: '管理个人执业信息', path: '/lawyer/profile' },
+    { icon: EditPen, color: '#1a56db', bg: '#e8effc', title: 'AI文书生成', desc: '智能生成起诉状、辩护词等', path: '/lawyer/templates' },
+    { icon: Postcard, color: '#0d9488', bg: '#e0f4f1', title: '律师资料', desc: '管理个人执业信息', path: '/lawyer/profile' },
   ]}
   if (type === 'ENTERPRISE') return { title: '企业工作台', desc: '合同管理、合规体检、法律风控', items: [
-    { icon: '📄', title: '合同管理', desc: '合同审批、归档、到期提醒', path: '/enterprise/contracts' },
-    { icon: '🛡️', title: '合规体检', desc: '企业合规风险智能检测', path: '/enterprise/compliance' },
+    { icon: Files, color: '#2563eb', bg: '#e6edfe', title: '合同管理', desc: '合同审批、归档、到期提醒', path: '/enterprise/contracts' },
+    { icon: CircleCheck, color: '#0e9f6e', bg: '#e2f6ec', title: '合规体检', desc: '企业合规风险智能检测', path: '/enterprise/compliance' },
   ]}
   if (type === 'ADMIN') return null
   return null
@@ -119,9 +127,10 @@ function goFeature(item) {
 .section-title { text-align: center; margin-bottom: 40px; }
 .section-title h2 { font-size: 28px; color: #1a1a2e; }
 .section-title p { color: #666; margin-top: 8px; }
-.el-col { display: flex; }
-.feature-card { text-align: center; padding: 32px 16px; cursor: pointer; height: 100%; display: flex; flex-direction: column; justify-content: center; }
-.feature-icon { font-size: 48px; margin-bottom: 16px; }
+.workspace-section .el-col, .features-section .el-col { display: flex; margin-bottom: 24px; }
+.feature-card { text-align: center; cursor: pointer; width: 100%; height: 100%; display: flex; }
+.feature-card :deep(.el-card__body) { width: 100%; padding: 32px 16px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.feature-icon { width: 68px; height: 68px; min-width: 68px; min-height: 68px; flex-shrink: 0; border-radius: 16px; margin: 0 auto 16px; display: flex; align-items: center; justify-content: center; box-sizing: border-box; }
 .feature-card h3 { font-size: 18px; margin-bottom: 8px; }
 .feature-card p { color: #666; font-size: 14px; }
 .stats-section { background: #fff; padding: 60px 20px; }
