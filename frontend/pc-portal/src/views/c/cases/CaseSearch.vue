@@ -16,6 +16,17 @@
           <el-input v-model="courtName" placeholder="法院" style="width:160px" clearable />
         </el-form-item>
         <el-form-item>
+          <el-select v-model="courtLevel" placeholder="法院层级" style="width:140px" clearable>
+            <el-option label="基层法院" value="BASE" />
+            <el-option label="中级法院" value="INTERMEDIATE" />
+            <el-option label="高级法院" value="HIGH" />
+            <el-option label="最高法院" value="SUPREME" />
+          </el-select>
+        </el-form-item>
+        <el-form-item>
+          <el-input v-model="lawArticle" placeholder="法条（如 民法典577条）" style="width:200px" clearable />
+        </el-form-item>
+        <el-form-item>
           <el-input v-model="caseYear" placeholder="年份" style="width:120px" clearable />
         </el-form-item>
         <el-form-item>
@@ -63,6 +74,10 @@
         <h4>争议焦点</h4>
         <p v-html="highlightText(currentCase.focusPoints)"></p>
         <el-divider />
+        <h4>判决依据</h4>
+        <p v-if="currentCase.judgmentBasis" v-html="highlightText(currentCase.judgmentBasis)"></p>
+        <p v-else style="color:#999">暂无判决依据提炼</p>
+        <el-divider />
         <h4>判决结果</h4>
         <p v-html="highlightText(currentCase.judgmentResult)"></p>
       </template>
@@ -78,6 +93,8 @@ const keyword = ref('')
 const causeName = ref('')
 const courtName = ref('')
 const caseYear = ref('')
+const lawArticle = ref('')
+const courtLevel = ref('')
 const cases = ref([])
 const total = ref(0)
 const page = ref(1)
@@ -112,6 +129,8 @@ async function search() {
       causeName: causeName.value || undefined,
       courtName: courtName.value || undefined,
       caseYear: caseYear.value || undefined,
+      lawArticle: lawArticle.value || undefined,
+      courtLevel: courtLevel.value || undefined,
       page: page.value,
       size: size.value,
     })

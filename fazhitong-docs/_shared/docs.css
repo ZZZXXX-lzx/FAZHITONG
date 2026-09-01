@@ -1,0 +1,110 @@
+/* 法智通工程文档集 · 共享样式 */
+:root {
+  --bg: #f6f8fb;
+  --bg2: #ffffff;
+  --ink: #1a1a2e;
+  --muted: #5b6472;
+  --rule: #e3e8ef;
+  --accent: #1a56db;
+  --accent2: #0d9488;
+  --warn: #b9770e;
+  --danger: #c0392b;
+  --font: -apple-system, "Segoe UI", "PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC", "Source Han Sans SC", sans-serif;
+  --font-mono: "SFMono-Regular", "JetBrains Mono", "Consolas", monospace;
+  --max: 1040px;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 16px; scroll-behavior: smooth; }
+body { font-family: var(--font); color: var(--ink); background: var(--bg); line-height: 1.7; -webkit-font-smoothing: antialiased; }
+
+/* 顶部导航 */
+.topnav { background: var(--ink); color: #fff; position: sticky; top: 0; z-index: 50; box-shadow: 0 1px 4px rgba(0,0,0,.12); }
+.topnav .inner { max-width: var(--max); margin: 0 auto; display: flex; align-items: center; gap: 1.4rem; padding: 0.7rem 1rem; }
+.topnav .brand { font-weight: 800; font-size: 1rem; letter-spacing: .02em; white-space: nowrap; }
+.topnav .brand a { color: #fff; text-decoration: none; }
+.topnav nav { display: flex; flex-wrap: wrap; gap: 0.2rem; }
+.topnav nav a { color: rgba(255,255,255,.72); text-decoration: none; font-size: .82rem; padding: .3rem .6rem; border-radius: 6px; white-space: nowrap; }
+.topnav nav a:hover { color: #fff; background: rgba(255,255,255,.12); }
+.topnav nav a.active { color: #fff; background: var(--accent); }
+
+/* 页面主体 */
+.page { max-width: var(--max); margin: 0 auto; padding: 1.6rem 1.2rem 4rem; }
+
+/* 文档头 */
+.doc-header { margin-bottom: 1.8rem; }
+.doc-header .kicker { display: inline-block; font-size: .76rem; letter-spacing: .1em; text-transform: uppercase; color: var(--accent2); font-weight: 700; }
+.doc-header h1 { font-size: 1.8rem; font-weight: 800; margin: .4rem 0 .4rem; line-height: 1.3; }
+.doc-header .meta { font-size: .85rem; color: var(--muted); }
+.doc-header .meta b { color: var(--ink); }
+
+/* 章节 */
+h2 { font-size: 1.3rem; font-weight: 800; color: var(--ink); margin: 2.2rem 0 .9rem; padding-left: .8rem; border-left: 5px solid var(--accent); }
+h3 { font-size: 1.08rem; font-weight: 700; margin: 1.6rem 0 .6rem; color: var(--ink); }
+p { margin-bottom: .9rem; color: #2c3344; }
+strong { color: var(--ink); }
+ul, ol { margin: .5rem 0 1rem 1.3rem; }
+li { margin-bottom: .3rem; color: #2c3344; }
+
+/* 表格 */
+.table-wrap { overflow-x: auto; overflow-y: auto; max-height: 660px; margin: 1.2rem 0; border: 1px solid var(--rule); border-radius: 10px; background: var(--bg2); }
+table { width: 100%; border-collapse: collapse; font-size: .88rem; }
+thead th { background: #eef2f8; color: var(--ink); text-align: left; font-weight: 700; padding: .7rem .8rem; border-bottom: 2px solid var(--rule); white-space: nowrap; position: sticky; top: 0; }
+tbody td { padding: .65rem .8rem; border-bottom: 1px solid var(--rule); vertical-align: top; color: #333a4a; }
+tbody tr:last-child td { border-bottom: none; }
+tbody tr:hover td { background: #f7fafd; }
+td.pri { white-space: nowrap; font-weight: 700; }
+.pri-high { color: var(--danger); }
+.pri-mid { color: var(--warn); }
+.pri-low { color: var(--accent); }
+
+/* 卡片 */
+.card-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin: 1.2rem 0; }
+.card { background: var(--bg2); border: 1px solid var(--rule); border-radius: 12px; padding: 1.2rem 1.3rem; }
+.card h4 { font-size: .98rem; font-weight: 700; margin-bottom: .5rem; color: var(--accent); }
+.card p { font-size: .88rem; color: var(--muted); margin: 0; }
+.card ul { margin: .5rem 0 0; }
+.card li { font-size: .88rem; }
+
+/* 代码块 */
+pre { background: #0f172a; color: #e2e8f0; border-radius: 10px; padding: 1rem 1.2rem; overflow-x: auto; font-family: var(--font-mono); font-size: .82rem; line-height: 1.6; margin: 1rem 0; }
+pre code { font-family: inherit; }
+code { font-family: var(--font-mono); font-size: .85em; background: #eef2f8; color: #1a56db; padding: .1rem .35rem; border-radius: 4px; }
+pre code { background: none; color: inherit; padding: 0; }
+code.hl { color: #0d9488; }
+
+/* 徽章 */
+.badge { display: inline-block; font-size: .72rem; font-weight: 700; padding: .14rem .5rem; border-radius: 20px; vertical-align: middle; }
+.badge.high { color: #fff; background: var(--danger); }
+.badge.mid { color: #fff; background: var(--warn); }
+.badge.low { color: #fff; background: var(--accent); }
+.badge.info { color: var(--accent); background: #e8effc; }
+
+/* 提示框 */
+.note { border-left: 4px solid var(--accent); background: #eef4ff; padding: .8rem 1rem; border-radius: 0 8px 8px 0; margin: 1rem 0; font-size: .9rem; color: #2c3344; }
+.note.warn { border-left-color: var(--warn); background: #fdf6e9; }
+.note.danger { border-left-color: var(--danger); background: #fdf0ef; }
+
+/* 图表 */
+figure.chart-figure { margin: 1.6rem 0; }
+figure.chart-figure figcaption { font-size: .88rem; font-weight: 700; color: var(--ink); margin-bottom: .7rem; }
+figure.diagram { margin: 1.6rem 0; text-align: center; }
+figure.diagram figcaption { font-size: .84rem; color: var(--muted); margin-top: .6rem; }
+.mermaid { background: var(--bg2); border: 1px solid var(--rule); border-radius: 10px; padding: 1.1rem; overflow-x: auto; text-align: center; }
+
+/* 索引页卡片 */
+.index-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin: 1.4rem 0; }
+.index-card { display: block; background: var(--bg2); border: 1px solid var(--rule); border-radius: 12px; padding: 1.2rem 1.3rem; text-decoration: none; transition: transform .15s, box-shadow .15s; }
+.index-card:hover { transform: translateY(-3px); box-shadow: 0 6px 18px rgba(26,86,219,.1); border-color: #c9d8f5; }
+.index-card .no { font-size: .78rem; font-weight: 800; color: var(--accent); letter-spacing: .06em; }
+.index-card h3 { font-size: 1.05rem; font-weight: 700; color: var(--ink); margin: .3rem 0 .4rem; }
+.index-card p { font-size: .85rem; color: var(--muted); margin: 0; }
+
+/* 页脚 */
+footer { border-top: 1px solid var(--rule); margin-top: 3rem; padding-top: 1.4rem; color: var(--muted); font-size: .82rem; }
+
+@media (max-width: 760px) {
+  .card-grid, .index-grid { grid-template-columns: 1fr; }
+  .topnav nav a { font-size: .76rem; padding: .25rem .45rem; }
+  .doc-header h1 { font-size: 1.4rem; }
+}
+@media print { .topnav { display: none; } body { background: #fff; } }

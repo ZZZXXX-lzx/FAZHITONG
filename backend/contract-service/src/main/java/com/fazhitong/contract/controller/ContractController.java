@@ -5,11 +5,13 @@ import com.fazhitong.common.dto.PageParam;
 import com.fazhitong.common.dto.PageResult;
 import com.fazhitong.common.exception.BusinessException;
 import com.fazhitong.contract.entity.ContractRecord;
+import com.fazhitong.contract.entity.ContractReviewRisk;
 import com.fazhitong.contract.entity.EnterpriseContract;
 import com.fazhitong.contract.service.ContractService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -56,14 +58,25 @@ public class ContractController {
     }
 
     /**
-     * 合同智能审查（传入合同文本，返回风险等级 + 审查报告）
+     * 合同智能审查（传入合同文本，返回结构化风险点清单 + 风险等级）
      */
     @PostMapping("/ai-review")
-    public ApiResult<Map<String, Object>> aiReview(@RequestBody Map<String, String> body) {
-        String text = body.getOrDefault("text", "");
+    public ApiResult<Map<String, Object>> aiReview(@RequestBody Map<String, Object> body) {
+        String text = body.get("text") == null ? "" : body.get("text").toString();
+        String dimension = body.get("dimension") == null ? "GENERAL" : body.get("dimension").toString();
+        Long userId = body.get("userId") == null ? null : Long.valueOf(body.get("userId").toString());
+        Long enterpriseId = body.get("enterpriseId") == null ? null : Long.valueOf(body.get("enterpriseId").toString());
         if (text == null || text.isBlank()) {
             throw new BusinessException("请提供待审查的合同文本");
         }
-        return ApiResult.success(contractService.aiReview(text));
+        return ApiResult.success(contractService.aiReview(text, dimension, userId, enterpriseId));
+    }
+
+    /**
+     * 查询审查任务的风险点清单
+     */
+    @GetMapping("/ai-review/{taskId}/risks")
+    public ApiResult<List<ContractReviewRisk>> listRisks(@PathVariable Long taskId) {
+        return ApiResult.success(contractService.listRisks(taskId));
     }
 }

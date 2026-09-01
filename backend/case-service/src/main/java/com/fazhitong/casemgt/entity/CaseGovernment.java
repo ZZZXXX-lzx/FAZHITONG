@@ -20,6 +20,8 @@ public class CaseGovernment {
     private String fullText;
     private String source;
     private Integer status;
+    /** 判决依据（智能提炼缓存） */
+    private String judgmentBasis;
     @TableField(fill = FieldFill.INSERT)
     private LocalDateTime createTime;
     @TableField(exist = false)

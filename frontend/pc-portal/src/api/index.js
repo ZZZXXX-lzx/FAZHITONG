@@ -39,12 +39,18 @@ export const contractApi = {
   records: (params) => request.get('/contract/records', { params }),
   enterpriseList: (params) => request.get('/contract/enterprise/list', { params }),
   createEnterprise: (data) => request.post('/contract/enterprise', data),
-  aiReview: (text) => request.post('/contract/ai-review', { text }),
+  aiReview: (text, dimension, userId, enterpriseId) => request.post('/contract/ai-review', { text, dimension, userId, enterpriseId }),
 }
 
 export const caseApi = {
   search: (params) => request.get('/case/search', { params }),
   getById: (id) => request.get(`/case/${id}`),
+}
+
+export const complianceApi = {
+  questions: (enterpriseId) => request.get('/user/compliance/questions', { params: { enterpriseId } }),
+  submitAnswers: (data) => request.post('/user/compliance/answers', data),
+  report: (enterpriseId) => request.get('/user/compliance/report', { params: { enterpriseId } }),
 }
 
 export const regulationApi = {
@@ -68,6 +74,7 @@ export const knowledgeApi = {
   categories: () => request.get('/case/knowledge/categories'),
   articles: (params) => request.get('/case/knowledge/articles', { params }),
   getArticle: (id) => request.get(`/case/knowledge/articles/${id}`),
+  retrieve: (query, topK) => request.post('/case/kb/retrieve', { query, topK }),
 }
 export const notificationApi = {
   list: (params) => request.get('/user/notification/list', { params }),

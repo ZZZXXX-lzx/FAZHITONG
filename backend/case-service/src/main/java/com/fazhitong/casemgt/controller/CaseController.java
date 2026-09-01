@@ -21,9 +21,11 @@ public class CaseController {
             @RequestParam(required = false) String causeName,
             @RequestParam(required = false) String courtName,
             @RequestParam(required = false) String caseYear,
+            @RequestParam(required = false) String lawArticle,
+            @RequestParam(required = false) String courtLevel,
             PageParam pageParam) {
         return ApiResult.success(
-                caseService.search(keyword, causeName, courtName, caseYear, pageParam));
+                caseService.search(keyword, causeName, courtName, caseYear, lawArticle, courtLevel, pageParam));
     }
 
     @GetMapping("/{id}")

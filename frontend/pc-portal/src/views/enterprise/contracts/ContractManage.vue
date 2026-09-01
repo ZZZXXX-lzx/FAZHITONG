@@ -35,7 +35,20 @@
     <el-dialog v-model="showReview" title="合同智能审查" width="720px" :close-on-click-modal="false">
       <el-alert type="info" :closable="false" show-icon style="margin-bottom:12px"
         title="请粘贴待审查的合同文本，AI 将识别风险点、给出修改建议与法律依据。" />
-      <el-input type="textarea" v-model="reviewText" :rows="12" placeholder="在此粘贴合同全文..." />
+      <el-form label-width="90px">
+        <el-form-item label="审查维度">
+          <el-select v-model="reviewDimension" style="width:100%">
+            <el-option label="通用审查" value="GENERAL" />
+            <el-option label="劳动用工" value="LABOR" />
+            <el-option label="买卖交易" value="SALE" />
+            <el-option label="租赁合同" value="LEASE" />
+            <el-option label="股权协议" value="EQUITY" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="合同文本">
+          <el-input type="textarea" v-model="reviewText" :rows="10" placeholder="在此粘贴合同全文..." />
+        </el-form-item>
+      </el-form>
       <template #footer>
         <el-button @click="showReview = false">取消</el-button>
         <el-button type="primary" :loading="reviewLoading" @click="submitReview">开始审查</el-button>
@@ -43,12 +56,24 @@
     </el-dialog>
 
     <!-- 审查结果 -->
-    <el-dialog v-model="showResult" title="审查结果" width="720px">
+    <el-dialog v-model="showResult" title="审查结果" width="760px" top="6vh">
       <div v-if="reviewResult">
-        <el-tag :type="riskTagType" size="large" style="margin-bottom:16px">
-          风险等级：{{ reviewResult.riskLevel }}
-        </el-tag>
-        <div class="report-box">{{ reviewResult.report }}</div>
+        <div class="result-head">
+          <el-tag :type="riskTagType" size="large">风险等级：{{ reviewResult.riskLevel }}</el-tag>
+          <el-tag v-if="reviewResult.mode === 'RULE'" type="info" size="small" style="margin-left:8px">规则模式</el-tag>
+        </div>
+        <div v-if="reviewResult.risks && reviewResult.risks.length" class="risk-list">
+          <div v-for="(r, i) in reviewResult.risks" :key="i" class="risk-item" :class="'risk-' + (r.level || 'LOW').toLowerCase()">
+            <div class="risk-head">
+              <el-tag :type="levelTagType(r.level)" size="small">{{ levelText(r.level) }}</el-tag>
+              <span class="risk-clause">{{ r.clause }}</span>
+            </div>
+            <p class="risk-desc">{{ r.description }}</p>
+            <p v-if="r.suggestion" class="risk-sugg"><strong>建议：</strong>{{ r.suggestion }}</p>
+            <p v-if="r.legalBasis" class="risk-basis"><strong>依据：</strong>{{ r.legalBasis }}</p>
+          </div>
+        </div>
+        <el-empty v-else description="未发现明显风险点" />
       </div>
     </el-dialog>
 
@@ -85,6 +110,7 @@ const loading = ref(false)
 const showReview = ref(false)
 const showResult = ref(false)
 const reviewText = ref('')
+const reviewDimension = ref('GENERAL')
 const reviewLoading = ref(false)
 const reviewResult = ref(null)
 
@@ -99,6 +125,17 @@ const riskTagType = computed(() => {
   if (lv === '中') return 'warning'
   return 'success'
 })
+
+function levelText(level) {
+  if (level === 'HIGH') return '高风险'
+  if (level === 'MEDIUM') return '中风险'
+  return '低风险'
+}
+function levelTagType(level) {
+  if (level === 'HIGH') return 'danger'
+  if (level === 'MEDIUM') return 'warning'
+  return 'success'
+}
 
 function statusText(status) {
   if (status === 'DRAFT') return '草稿'
@@ -133,7 +170,7 @@ async function submitReview() {
   }
   reviewLoading.value = true
   try {
-    reviewResult.value = await contractApi.aiReview(reviewText.value.trim())
+    reviewResult.value = await contractApi.aiReview(reviewText.value.trim(), reviewDimension.value, null, enterpriseId())
     showReview.value = false
     showResult.value = true
   } catch {
@@ -178,13 +215,15 @@ async function submitCreate() {
 .page-header { margin-bottom: 24px; }
 .page-header h2 { font-size: 24px; }
 .page-header p { color: #666; margin-top: 4px; }
-.report-box {
-  white-space: pre-wrap;
-  background: #f5f7fa;
-  border-radius: 8px;
-  padding: 16px;
-  line-height: 1.7;
-  max-height: 420px;
-  overflow-y: auto;
-}
+.result-head { margin-bottom: 16px; }
+.risk-list { max-height: 520px; overflow-y: auto; }
+.risk-item { border: 1px solid #e4e7ed; border-left: 4px solid #67c23a; border-radius: 6px; padding: 12px 14px; margin-bottom: 12px; }
+.risk-item.risk-high { border-left-color: #f56c6c; }
+.risk-item.risk-medium { border-left-color: #e6a23c; }
+.risk-item.risk-low { border-left-color: #67c23a; }
+.risk-head { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.risk-clause { font-size: 13px; color: #909399; }
+.risk-desc { color: #333; margin: 0 0 6px; }
+.risk-sugg, .risk-basis { color: #666; font-size: 13px; margin: 0 0 4px; }
+.risk-basis { color: #1a56db; }
 </style>
