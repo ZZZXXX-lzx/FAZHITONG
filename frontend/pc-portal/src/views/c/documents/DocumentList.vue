@@ -52,6 +52,9 @@
 import { ref, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { documentApi } from '@/api'
+import { useUserStore } from '@/store/user'
+
+const userStore = useUserStore()
 
 const activeCategory = ref('')
 const keyword = ref('')
@@ -93,6 +96,10 @@ function openDraft() {
 }
 
 async function submitDraft() {
+  if (!userStore.isLoggedIn) {
+    ElMessage.warning('请先登录后再使用 AI 智能起草')
+    return
+  }
   if (!draftDesc.value.trim()) {
     ElMessage.warning('请填写需求描述')
     return
