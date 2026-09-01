@@ -40,6 +40,13 @@ export const contractApi = {
   enterpriseList: (params) => request.get('/contract/enterprise/list', { params }),
   createEnterprise: (data) => request.post('/contract/enterprise', data),
   aiReview: (text, dimension, userId, enterpriseId) => request.post('/contract/ai-review', { text, dimension, userId, enterpriseId }),
+  transition: (id, action, signerName) => request.post(`/contract/enterprise/${id}/transition`, null, { params: { action, signerName } }),
+  expiring: (enterpriseId, days) => request.get('/contract/enterprise/expiring', { params: { enterpriseId, days } }),
+  ipList: (params) => request.get('/contract/ip/list', { params }),
+  ipCreate: (data) => request.post('/contract/ip', data),
+  ipUpdate: (data) => request.put('/contract/ip', data),
+  ipDelete: (id) => request.delete(`/contract/ip/${id}`),
+  ipExpiring: (enterpriseId, days) => request.get('/contract/ip/expiring', { params: { enterpriseId, days } }),
 }
 
 export const caseApi = {

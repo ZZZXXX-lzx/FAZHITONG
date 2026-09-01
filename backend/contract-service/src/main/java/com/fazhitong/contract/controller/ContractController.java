@@ -58,6 +58,27 @@ public class ContractController {
     }
 
     /**
+     * 合同状态流转（提交签署 / 签署 / 归档 / 作废）
+     */
+    @PostMapping("/enterprise/{id}/transition")
+    public ApiResult<EnterpriseContract> transition(
+            @PathVariable Long id,
+            @RequestParam String action,
+            @RequestParam(required = false) String signerName) {
+        return ApiResult.success(contractService.transition(id, action, signerName));
+    }
+
+    /**
+     * 到期预警：查询距离到期不足 days 天的合同
+     */
+    @GetMapping("/enterprise/expiring")
+    public ApiResult<List<EnterpriseContract>> listExpiring(
+            @RequestParam Long enterpriseId,
+            @RequestParam(defaultValue = "30") int days) {
+        return ApiResult.success(contractService.listExpiring(enterpriseId, days));
+    }
+
+    /**
      * 合同智能审查（传入合同文本，返回结构化风险点清单 + 风险等级）
      */
     @PostMapping("/ai-review")

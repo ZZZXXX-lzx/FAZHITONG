@@ -20,6 +20,7 @@ const routes = [
       { path: 'enterprise', name: 'EnterpriseHome', component: () => import('@/views/enterprise/home/EnterpriseHome.vue'), meta: { title: '企业工作台', roles: ['ENTERPRISE', 'ADMIN'] } },
       { path: 'enterprise/contracts', name: 'EnterpriseContracts', component: () => import('@/views/enterprise/contracts/ContractManage.vue'), meta: { title: '合同管理', roles: ['ENTERPRISE', 'ADMIN'] } },
       { path: 'enterprise/compliance', name: 'EnterpriseCompliance', component: () => import('@/views/enterprise/compliance/CompliancePage.vue'), meta: { title: '合规体检', roles: ['ENTERPRISE', 'ADMIN'] } },
+      { path: 'enterprise/ip', name: 'EnterpriseIp', component: () => import('@/views/enterprise/ip/IpManage.vue'), meta: { title: '知识产权管理', roles: ['ENTERPRISE', 'ADMIN'] } },
       { path: 'knowledge', name: 'Knowledge', component: () => import('@/views/c/knowledge/KnowledgePage.vue'), meta: { title: '法律知识库' } },
       { path: 'knowledge/:id', name: 'KnowledgeDetail', component: () => import('@/views/c/knowledge/KnowledgeDetail.vue'), meta: { title: '文章详情' } },
       { path: 'lawyers', name: 'LawyerHall', component: () => import('@/views/c/lawyer/LawyerHall.vue'), meta: { title: '找律师' } },

@@ -89,6 +89,9 @@ public class ContractService {
     }
 
     public EnterpriseContract createEnterpriseContract(EnterpriseContract contract) {
+        if (contract.getStatus() == null || contract.getStatus().isBlank()) {
+            contract.setStatus("DRAFT");
+        }
         enterpriseContractMapper.insert(contract);
         return contract;
     }
@@ -99,7 +102,74 @@ public class ContractService {
                 new LambdaQueryWrapper<EnterpriseContract>()
                         .eq(EnterpriseContract::getEnterpriseId, enterpriseId)
                         .orderByDesc(EnterpriseContract::getCreateTime));
+        for (EnterpriseContract c : page.getRecords()) {
+            c.setDaysToExpire(daysToExpire(c.getExpireDate()));
+        }
         return PageResult.of(page.getRecords(), page.getTotal(), (int) page.getCurrent(), (int) page.getSize());
+    }
+
+    /**
+     * 合同状态流转：提交签署、签署、归档、作废。
+     * 电子签章：签署时生成签章凭据号并记录签署人与时间。
+     */
+    public EnterpriseContract transition(Long id, String action, String signerName) {
+        EnterpriseContract c = enterpriseContractMapper.selectById(id);
+        if (c == null) {
+            throw new BusinessException("合同不存在");
+        }
+        switch (action) {
+            case "SUBMIT" -> c.setStatus("PENDING_SIGN");
+            case "SIGN" -> {
+                if (!"PENDING_SIGN".equals(c.getStatus()) && !"DRAFT".equals(c.getStatus())) {
+                    throw new BusinessException("当前状态不可签署");
+                }
+                c.setStatus("SIGNED");
+                c.setSignerName(signerName == null || signerName.isBlank() ? "企业签章" : signerName);
+                c.setSignCertNo(generateCertNo(c));
+                c.setSignTime(LocalDateTime.now());
+            }
+            case "ARCHIVE" -> {
+                if (!"SIGNED".equals(c.getStatus())) {
+                    throw new BusinessException("仅已签署合同可归档");
+                }
+                c.setStatus("ARCHIVED");
+                c.setArchiveTime(LocalDateTime.now());
+            }
+            case "VOID" -> c.setStatus("VOID");
+            default -> throw new BusinessException("非法的状态操作");
+        }
+        enterpriseContractMapper.updateById(c);
+        return c;
+    }
+
+    /**
+     * 到期预警：查询某企业距离到期不足 days 天的合同。
+     */
+    public List<EnterpriseContract> listExpiring(Long enterpriseId, int days) {
+        LocalDateTime threshold = LocalDateTime.now().plusDays(days);
+        List<EnterpriseContract> list = enterpriseContractMapper.selectList(
+                new LambdaQueryWrapper<EnterpriseContract>()
+                        .eq(EnterpriseContract::getEnterpriseId, enterpriseId)
+                        .in(EnterpriseContract::getStatus, "SIGNED", "PENDING_SIGN")
+                        .isNotNull(EnterpriseContract::getExpireDate)
+                        .le(EnterpriseContract::getExpireDate, threshold)
+                        .orderByAsc(EnterpriseContract::getExpireDate));
+        for (EnterpriseContract c : list) {
+            c.setDaysToExpire(daysToExpire(c.getExpireDate()));
+        }
+        return list;
+    }
+
+    /** 生成电子签章凭据号：FZT + 时间戳 + 合同序号，模拟 CA 证书编号 */
+    private String generateCertNo(EnterpriseContract c) {
+        long ts = System.currentTimeMillis();
+        long seq = (c.getId() == null ? 0 : c.getId()) % 10000;
+        return String.format("FZT-%d-%04d", ts, seq);
+    }
+
+    private Integer daysToExpire(LocalDateTime expireDate) {
+        if (expireDate == null) return null;
+        return (int) java.time.Duration.between(LocalDateTime.now(), expireDate).toDays();
     }
 
     /**

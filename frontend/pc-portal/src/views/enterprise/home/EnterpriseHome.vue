@@ -5,7 +5,7 @@
       <p>企业法律合规管理 · 全链条法务支持</p>
     </div>
     <el-row :gutter="24">
-      <el-col :span="6" v-for="item in enterpriseFeatures" :key="item.title">
+      <el-col :xs="24" :sm="12" :md="8" v-for="item in enterpriseFeatures" :key="item.title">
         <el-card class="feature-card" shadow="hover" @click="$router.push(item.path)">
           <div class="feature-icon">{{ item.icon }}</div>
           <h3>{{ item.title }}</h3>
@@ -41,6 +41,7 @@ const enterprise = ref({
 const enterpriseFeatures = [
   { icon: '📄', title: '合同管理', desc: '合同全生命周期管理，智能审查风险', path: '/enterprise/contracts' },
   { icon: '🔍', title: '合规体检', desc: 'AI智能扫描企业法律风险', path: '/enterprise/compliance' },
+  { icon: '⚖️', title: '知识产权', desc: '商标、专利、著作权台账管理', path: '/enterprise/ip' },
   { icon: '💬', title: '企业咨询', desc: '专属律师团队，不限次咨询', path: '/consultation' },
   { icon: '📋', title: '合同模板', desc: '企业专属合同模板库', path: '/templates' },
 ]
@@ -51,7 +52,7 @@ const enterpriseFeatures = [
 .page-header { margin-bottom: 24px; }
 .page-header h2 { font-size: 24px; }
 .page-header p { color: #666; }
-.feature-card { text-align: center; padding: 24px 16px; cursor: pointer; }
+.feature-card { text-align: center; padding: 24px 16px; cursor: pointer; margin-bottom: 20px; }
 .feature-icon { font-size: 40px; margin-bottom: 12px; }
 .feature-card h3 { font-size: 16px; margin-bottom: 4px; }
 .feature-card p { color: #999; font-size: 13px; }

@@ -23,12 +23,27 @@
         <el-table-column prop="amount" label="金额" width="120" />
         <el-table-column prop="status" label="状态" width="100">
           <template #default="{ row }">
-            <el-tag :type="row.status === 'SIGNED' ? 'success' : row.status === 'EXPIRED' ? 'danger' : 'info'">
-              {{ statusText(row.status) }}
+            <el-tag :type="statusTag(row.status)">{{ statusText(row.status) }}</el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column label="到期预警" width="110">
+          <template #default="{ row }">
+            <el-tag v-if="row.daysToExpire !== null && row.daysToExpire !== undefined && row.daysToExpire <= 30" type="danger" size="small">
+              {{ row.daysToExpire }} 天
             </el-tag>
+            <span v-else>-</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="操作" width="180" fixed="right">
+          <template #default="{ row }">
+            <el-button v-if="row.status === 'DRAFT'" size="small" type="primary" @click="transition(row, 'SUBMIT')">提交签署</el-button>
+            <el-button v-if="row.status === 'PENDING_SIGN'" size="small" type="success" @click="transition(row, 'SIGN')">签署</el-button>
+            <el-button v-if="row.status === 'SIGNED'" size="small" @click="transition(row, 'ARCHIVE')">归档</el-button>
           </template>
         </el-table-column>
       </el-table>
+      <el-alert v-if="expiring.length" type="warning" show-icon :closable="false" style="margin-top:16px"
+        :title="`有 ${expiring.length} 份合同将在 30 天内到期，请及时处理`" />
     </el-card>
 
     <!-- 合同智能审查 -->
@@ -104,6 +119,7 @@ import { useUserStore } from '@/store/user'
 
 const userStore = useUserStore()
 const contracts = ref([])
+const expiring = ref([])
 const loading = ref(false)
 
 // 智能审查
@@ -139,9 +155,19 @@ function levelTagType(level) {
 
 function statusText(status) {
   if (status === 'DRAFT') return '草稿'
+  if (status === 'PENDING_SIGN') return '待签署'
   if (status === 'SIGNED') return '已签署'
+  if (status === 'ARCHIVED') return '已归档'
   if (status === 'EXPIRED') return '已过期'
+  if (status === 'VOID') return '已作废'
   return status || '草稿'
+}
+function statusTag(status) {
+  if (status === 'SIGNED') return 'success'
+  if (status === 'PENDING_SIGN') return 'warning'
+  if (status === 'EXPIRED' || status === 'VOID') return 'danger'
+  if (status === 'ARCHIVED') return 'info'
+  return 'info'
 }
 
 function enterpriseId() {
@@ -160,6 +186,21 @@ async function loadContracts() {
     ElMessage.error('加载合同列表失败')
   } finally {
     loading.value = false
+  }
+  try {
+    expiring.value = await contractApi.expiring(enterpriseId(), 30)
+  } catch {
+    expiring.value = []
+  }
+}
+
+async function transition(row, action) {
+  try {
+    await contractApi.transition(row.id, action)
+    ElMessage.success(action === 'SIGN' ? '签署成功' : '操作成功')
+    loadContracts()
+  } catch (e) {
+    ElMessage.error(e?.response?.data?.msg || '操作失败')
   }
 }
 
