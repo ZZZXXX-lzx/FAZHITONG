@@ -31,6 +31,16 @@ export const consultationApi = {
   pending: (params) => request.get('/consultation/pending', { params }),
   all: (params) => request.get('/consultation/all', { params }),
   getById: (id) => request.get(`/consultation/${id}`),
+  caseList: (params) => request.get('/consultation/case/list', { params }),
+  caseCreate: (data) => request.post('/consultation/case', data),
+  caseUpdate: (data) => request.put('/consultation/case', data),
+  caseTransition: (id, action) => request.post(`/consultation/case/${id}/transition`, null, { params: { action } }),
+  caseDelete: (id) => request.delete(`/consultation/case/${id}`),
+  caseStats: (lawyerId) => request.get('/consultation/case/stats', { params: { lawyerId } }),
+  clientList: (params) => request.get('/consultation/client/list', { params }),
+  clientCreate: (data) => request.post('/consultation/client', data),
+  clientUpdate: (data) => request.put('/consultation/client', data),
+  clientDelete: (id) => request.delete(`/consultation/client/${id}`),
 }
 
 export const contractApi = {
@@ -52,6 +62,8 @@ export const contractApi = {
 export const caseApi = {
   search: (params) => request.get('/case/search', { params }),
   getById: (id) => request.get(`/case/${id}`),
+  litigation: (cause, description) => request.post('/case/litigation/analyze', { cause, description }),
+  dueDiligence: (companyName, focus) => request.post('/case/due-diligence/report', { companyName, focus }),
 }
 
 export const complianceApi = {
@@ -82,6 +94,9 @@ export const knowledgeApi = {
   articles: (params) => request.get('/case/knowledge/articles', { params }),
   getArticle: (id) => request.get(`/case/knowledge/articles/${id}`),
   retrieve: (query, topK) => request.post('/case/kb/retrieve', { query, topK }),
+  kgGraph: (domain) => request.get('/case/kg/graph', { params: { domain } }),
+  kgDomains: () => request.get('/case/kg/domains'),
+  kgRelated: (keyword) => request.get('/case/kg/related', { params: { keyword } }),
 }
 export const notificationApi = {
   list: (params) => request.get('/user/notification/list', { params }),

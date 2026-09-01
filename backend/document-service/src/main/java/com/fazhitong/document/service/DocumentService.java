@@ -91,14 +91,65 @@ public class DocumentService {
     }
 
     /**
-     * AI 文书起草：根据文书类型和需求描述生成草稿，未配置大模型时降级为框架模板。
+     * AI 文书起草：优先调用大模型，未配置或失败时降级为从模板库智能匹配。
      */
     public String aiDraft(String type, String description) {
         String draft = null;
         if (AiClient.isEnabled()) {
             draft = AiClient.chat(DRAFT_SYSTEM_PROMPT, "文书类型：" + type + "\n需求描述：" + description);
         }
-        return (draft == null || draft.isBlank()) ? fallbackDraft(type, description) : draft;
+        if (draft != null && !draft.isBlank()) {
+            return draft;
+        }
+        // 降级：从模板库匹配最相关的模板
+        String matched = matchTemplateDraft(type, description);
+        if (matched != null) {
+            return matched;
+        }
+        return fallbackDraft(type, description);
+    }
+
+    /**
+     * 从模板库按文书类型与需求描述匹配最相关模板，返回模板内容（含占位符）。
+     * 匹配策略：先按类型关键词匹配模板名称/分类，再按需求描述关键词兜底。
+     */
+    private String matchTemplateDraft(String type, String description) {
+        List<DocumentTemplate> templates = templateMapper.selectList(
+                new LambdaQueryWrapper<DocumentTemplate>().eq(DocumentTemplate::getStatus, 1));
+        if (templates == null || templates.isEmpty()) {
+            return null;
+        }
+        String query = (type == null ? "" : type) + " " + (description == null ? "" : description);
+        String best = null;
+        int bestScore = -1;
+        for (DocumentTemplate t : templates) {
+            int score = matchScore(query, t.getName()) * 3 + matchScore(query, t.getCategory());
+            if (score > bestScore) {
+                bestScore = score;
+                best = t.getContent();
+            }
+        }
+        if (best == null || best.isBlank() || bestScore <= 0) {
+            return null;
+        }
+        return best + "\n\n（提示：已根据「" + type + "」匹配最接近的文书模板，填写其中的占位符即可使用；配置大模型后可获得更贴合描述的定制草稿。）";
+    }
+
+    /** 计算查询串与文本的匹配得分：命中关键词数量 */
+    private int matchScore(String query, String text) {
+        if (text == null || text.isBlank() || query == null || query.isBlank()) return 0;
+        int score = 0;
+        for (String term : query.split("[\\s，。、；：,.;:!?！？()（）]+")) {
+            if (term.isBlank()) continue;
+            if (text.contains(term)) score++;
+            // 长词做二元切分提升命中
+            if (term.length() >= 2) {
+                for (int i = 0; i + 2 <= term.length(); i++) {
+                    if (text.contains(term.substring(i, i + 2))) score++;
+                }
+            }
+        }
+        return score;
     }
 
     private String fallbackDraft(String type, String description) {

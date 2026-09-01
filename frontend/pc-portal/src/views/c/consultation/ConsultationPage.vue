@@ -25,7 +25,7 @@
           <template v-if="canLawyerConsult">
             <el-button type="success" @click="showLawyerDialog = true">发起律师咨询</el-button>
           </template>
-          <el-alert v-else type="warning" :closable="false" show-icon>律师咨询仅对认证律师和企业用户开放</el-alert>
+          <el-alert v-else type="warning" :closable="false" show-icon>请先登录后发起律师咨询</el-alert>
           <el-divider />
           <h4 style="margin-bottom:12px">我的咨询记录</h4>
           <div v-for="item in myConsultations" :key="item.id" class="consult-item" style="cursor:pointer" @click="viewDetail(item)">
@@ -81,7 +81,7 @@ const aiLoading = ref(false)
 const showLawyerDialog = ref(false)
 const myConsultations = ref([])
 const lawyerConsult = ref({ title: '', question: '' })
-const canLawyerConsult = computed(() => ['LAWYER', 'ENTERPRISE', 'ADMIN'].includes(userStore.userType))
+const canLawyerConsult = computed(() => ['USER', 'LAWYER', 'ENTERPRISE', 'ADMIN'].includes(userStore.userType))
 const detailVisible = ref(false)
 const detailItem = ref(null)
 
@@ -121,8 +121,8 @@ async function loadMyConsultations() {
 }
 
 async function submitLawyerConsult() {
-  if (!canLawyerConsult.value) {
-    ElMessage.warning('律师咨询仅对认证律师和企业用户开放')
+  if (!userStore.isLoggedIn) {
+    ElMessage.warning('请先登录后发起律师咨询')
     return
   }
   if (!lawyerConsult.value.title || !lawyerConsult.value.question) {
