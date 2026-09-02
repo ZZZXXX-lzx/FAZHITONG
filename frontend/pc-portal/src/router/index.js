@@ -5,9 +5,11 @@ import { ElMessage } from 'element-plus'
 const routes = [
   {
     path: '/',
-    component: () => import('@/views/layout/MainLayout.vue'),
+    component: () => import('@/views/layout/LayoutEntry.vue'),
     children: [
-      { path: '', name: 'Home', component: () => import('@/views/c/home/HomePage.vue'), meta: { title: '首页' } },
+      { path: '', name: 'Home', component: () => import('@/views/c/home/HomeEntry.vue'), meta: { title: '首页' } },
+      { path: 'services', name: 'MobileServices', component: () => import('@/views/c/mobile/MobileServices.vue'), meta: { title: '全部服务' } },
+      { path: 'mine', name: 'Mine', component: () => import('@/views/c/mobile/MinePage.vue'), meta: { title: '我的' } },
       { path: 'documents', name: 'Documents', component: () => import('@/views/c/documents/DocumentList.vue'), meta: { title: '文书生成' } },
       { path: 'documents/:id', name: 'DocumentDetail', component: () => import('@/views/c/documents/DocumentDetail.vue'), meta: { title: '文书详情' } },
       { path: 'consultation', name: 'Consultation', component: () => import('@/views/c/consultation/ConsultationPage.vue'), meta: { title: '法律咨询' } },

@@ -25,9 +25,18 @@ if %errorlevel%==0 (
 )
 
 echo.
-echo 放行完成后，手机连同一个 WiFi，浏览器访问：
-echo    http://192.168.9.112:3000
+echo ========================================
+echo   请用以下局域网地址访问（手机连同一个 WiFi）：
+echo ========================================
 echo.
-echo （如果 IP 变了，在电脑上运行 ipconfig 查看 WLAN 的 IPv4 地址）
+for /f "tokens=1,2 delims=:" %%a in ('ipconfig ^| findstr /i "IPv4"') do (
+    set ip=%%b
+    setlocal enabledelayedexpansion
+    set ip=!ip: =!
+    if not "!ip!"=="" if not "!ip:~0,3!"=="127" echo    http://!ip!:3000
+    endlocal
+)
+echo.
+echo   提示：请选择与手机同一网段（通常 192.168.x.x）的那个地址。
 echo.
 pause

@@ -92,7 +92,7 @@ function onPageChange(p) { page.value = p; loadTemplates() }
 
 function openDraft() {
   draftResult.value = ''
-  showDraft = true
+  showDraft.value = true
 }
 
 async function submitDraft() {
