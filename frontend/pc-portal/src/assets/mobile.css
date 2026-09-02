@@ -10,4 +10,35 @@
   .page-header { padding: 16px !important; }
   .page-header h2 { font-size: 20px !important; }
   .el-progress { min-width: 60px !important; }
+
+  /* 输入控件占满宽（覆盖内联 width） */
+  .el-input { width: 100% !important; }
+  .el-select { width: 100% !important; }
+  .el-input-number { width: 100% !important; }
+  .el-form--inline .el-form-item .el-select { width: 100% !important; }
+  .el-form--inline .el-form-item .el-input-number { width: 100% !important; }
+
+  /* 表单 label 换行显示 */
+  .el-form-item { display: block !important; }
+  .el-form-item__label { float: none !important; display: block !important; text-align: left !important; width: auto !important; padding: 0 0 6px !important; }
+  .el-form-item__content { margin-left: 0 !important; }
+
+  /* 表格横向滚动 */
+  .el-table__body-wrapper { overflow-x: auto !important; }
+  .el-table__header-wrapper { overflow-x: auto !important; }
+
+  /* 通用页面容器内边距收紧 */
+  .case-search, .consultation-page, .template-list, .regulation-page,
+  .toolbox-page, .document-list, .knowledge-page {
+    padding: 16px 12px !important;
+  }
+
+  /* 法规/案例元信息与标题自动换行 */
+  .reg-meta, .reg-title { flex-wrap: wrap !important; row-gap: 4px !important; }
+  .search-examples { gap: 6px !important; }
+
+  /* 弹窗内表单与内容适配 */
+  .el-dialog__body { padding: 16px !important; }
+  .el-dialog__header { padding: 14px 16px 0 !important; }
+  .el-dialog__footer { padding: 8px 16px 16px !important; }
 }

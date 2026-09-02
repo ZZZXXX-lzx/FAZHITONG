@@ -10,9 +10,9 @@
       <el-tab-pane label="全部" name="" />
       <el-tab-pane v-for="cat in categories" :key="cat.code" :label="cat.name" :name="cat.code" />
     </el-tabs>
-    <el-input v-model="keyword" placeholder="搜索文书模板" clearable style="width:300px;margin-bottom:20px" @input="loadTemplates" />
-    <el-row :gutter="20">
-      <el-col :span="6" v-for="tpl in templates" :key="tpl.id">
+    <el-input v-model="keyword" placeholder="搜索文书模板" clearable class="tpl-search" @input="loadTemplates" />
+    <el-row :gutter="12">
+      <el-col :xs="12" :sm="6" v-for="tpl in templates" :key="tpl.id">
         <el-card class="template-card" shadow="hover" @click="$router.push(`/documents/${tpl.id}`)">
           <h3>{{ tpl.name }}</h3>
           <p class="template-type">{{ tpl.category }}</p>
@@ -131,7 +131,8 @@ async function copyDraft() {
 .page-header { margin-bottom: 24px; }
 .page-header h2 { font-size: 24px; }
 .page-header p { color: #666; margin-top: 4px; margin-bottom: 12px; }
-.template-card { cursor: pointer; margin-bottom: 20px; }
+.tpl-search { width: 300px; margin-bottom: 20px; }
+.template-card { cursor: pointer; margin-bottom: 12px; }
 .template-card h3 { font-size: 16px; margin-bottom: 8px; }
 .template-type { color: #999; font-size: 13px; }
 .draft-box {

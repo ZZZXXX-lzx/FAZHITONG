@@ -41,9 +41,7 @@
             <div class="feature-icon" :style="{ background: item.bg, color: item.color }">
               <el-icon :size="34"><component :is="item.icon" /></el-icon>
             </div>
-            <h3>{{ item.title }}
-              <el-tag v-if="item.premium && !userStore.isLoggedIn" size="small" type="warning" style="vertical-align:middle;margin-left:4px">需登录</el-tag>
-            </h3>
+            <h3>{{ item.title }}</h3>
             <p>{{ item.desc }}</p>
           </el-card>
         </el-col>
@@ -71,24 +69,12 @@ import {
   User, Tools, Umbrella, EditPen, Postcard, Files, CircleCheck,
   ScaleToOriginal, OfficeBuilding, Connection,
 } from '@element-plus/icons-vue'
+import { allServicesFor } from '@/config/services'
 
 const router = useRouter()
 const userStore = useUserStore()
 
-const features = [
-  { icon: Document, color: '#1a56db', bg: '#e8effc', title: '文书生成', desc: 'AI智能生成起诉状、答辩状等法律文书', path: '/documents' },
-  { icon: ChatDotRound, color: '#0d9488', bg: '#e0f4f1', title: '法律咨询', desc: '7×15小时在线咨询，5分钟快速响应', path: '/consultation' },
-  { icon: Search, color: '#2563eb', bg: '#e6edfe', title: '案例检索', desc: '千万级裁判文书智能检索', path: '/cases' },
-  { icon: Notebook, color: '#7c3aed', bg: '#f1e9fe', title: '法规检索', desc: '法律法规、司法解释快速查询', path: '/regulations' },
-  { icon: DocumentChecked, color: '#b45309', bg: '#fbf0dd', title: '合同模板', desc: '海量合同模板一键套用', path: '/templates' },
-  { icon: Reading, color: '#0e9f6e', bg: '#e2f6ec', title: '法律知识库', desc: '法律法规、法律常识、专业解读', path: '/knowledge' },
-  { icon: Connection, color: '#0891b2', bg: '#e0f2f7', title: '法律知识图谱', desc: '领域、法规、概念关联关系可视化', path: '/knowledge-graph' },
-  { icon: User, color: '#be185d', bg: '#fbe7f0', title: '找律师', desc: '认证律师大厅，按专长精准匹配', path: '/lawyers' },
-  { icon: Tools, color: '#d97706', bg: '#fdf1dd', title: '法律工具箱', desc: '诉讼费、利息、工伤赔偿计算器', path: '/toolbox' },
-  { icon: ScaleToOriginal, color: '#7c3aed', bg: '#f1e9fe', title: '诉讼智能', desc: '案件分析、庭审提纲、判决预测', path: '/litigation' },
-  { icon: OfficeBuilding, color: '#0d9488', bg: '#e0f4f1', title: '尽职调查', desc: '企业尽调、风险清单、涉诉核查', path: '/due-diligence' },
-  { icon: Umbrella, color: '#c2410c', bg: '#fdeee4', title: '法律援助', desc: '为经济困难群众提供免费法律服务', path: '/legal-aid', premium: true },
-]
+const features = computed(() => allServicesFor(userStore.userType, userStore.isLoggedIn))
 
 const roleWorkspace = computed(() => {
   const type = userStore.userType
@@ -112,11 +98,6 @@ const stats = [
 ]
 
 function goFeature(item) {
-  if (!userStore.isLoggedIn) {
-    ElMessage.info('请先登录使用完整功能')
-    router.push('/login')
-    return
-  }
   router.push(item.path)
 }
 </script>

@@ -5,7 +5,7 @@
       <p>高效办案工具 · AI辅助法律文书</p>
     </div>
     <el-row :gutter="24">
-      <el-col :span="8">
+      <el-col :xs="24" :sm="8">
         <el-card>
           <template #header>
             <strong>法律咨询</strong>
@@ -29,7 +29,7 @@
           </div>
         </el-card>
       </el-col>
-      <el-col :span="8">
+      <el-col :xs="24" :sm="8">
         <el-card>
           <template #header><strong>AI 智能工具</strong></template>
           <el-button style="width:100%;margin-bottom:12px" @click="$router.push('/lawyer/templates')">AI 文书生成</el-button>
@@ -39,7 +39,7 @@
           <el-button style="width:100%" @click="$router.push('/lawyer/profile')">律师资料管理</el-button>
         </el-card>
       </el-col>
-      <el-col :span="8">
+      <el-col :xs="24" :sm="8">
         <el-card>
           <template #header><strong>收费报价</strong></template>
           <p>法律文书：<strong>99-299元/份</strong></p>

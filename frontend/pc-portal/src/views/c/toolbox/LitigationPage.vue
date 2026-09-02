@@ -30,13 +30,13 @@
       </el-card>
 
       <el-row :gutter="16">
-        <el-col :span="12">
+        <el-col :xs="24" :sm="12">
           <el-card class="result-block">
             <template #header><strong>争议焦点</strong></template>
             <ul class="item-list"><li v-for="(f, i) in result.focus" :key="i">{{ f }}</li></ul>
           </el-card>
         </el-col>
-        <el-col :span="12">
+        <el-col :xs="24" :sm="12">
           <el-card class="result-block">
             <template #header><strong>证据建议</strong></template>
             <ul class="item-list"><li v-for="(e, i) in result.evidence" :key="i">{{ e }}</li></ul>
@@ -55,13 +55,13 @@
       </el-card>
 
       <el-row :gutter="16">
-        <el-col :span="12">
+        <el-col :xs="24" :sm="12">
           <el-card class="result-block">
             <template #header><strong>庭审提纲</strong></template>
             <ul class="item-list"><li v-for="(t, i) in result.trialOutline" :key="i">{{ typeof t === 'string' ? t : t.desc }}</li></ul>
           </el-card>
         </el-col>
-        <el-col :span="12">
+        <el-col :xs="24" :sm="12">
           <el-card class="result-block">
             <template #header><strong>质证要点</strong></template>
             <ul class="item-list"><li v-for="(c, i) in result.crossExam" :key="i">{{ typeof c === 'string' ? c : c.desc }}</li></ul>

@@ -6,10 +6,10 @@
     </div>
 
     <el-row :gutter="16" style="margin-bottom:16px">
-      <el-col :span="6"><el-card shadow="never"><div class="stat"><span class="num">{{ stats.total || 0 }}</span><span class="lbl">全部案件</span></div></el-card></el-col>
-      <el-col :span="6"><el-card shadow="never"><div class="stat"><span class="num">{{ stats.inProgress || 0 }}</span><span class="lbl">承办中</span></div></el-card></el-col>
-      <el-col :span="6"><el-card shadow="never"><div class="stat"><span class="num">{{ stats.closed || 0 }}</span><span class="lbl">已结案</span></div></el-card></el-col>
-      <el-col :span="6"><el-card shadow="never"><div class="stat"><span class="num">{{ clients.length }}</span><span class="lbl">客户数</span></div></el-card></el-col>
+      <el-col :xs="12" :sm="6"><el-card shadow="never"><div class="stat"><span class="num">{{ stats.total || 0 }}</span><span class="lbl">全部案件</span></div></el-card></el-col>
+      <el-col :xs="12" :sm="6"><el-card shadow="never"><div class="stat"><span class="num">{{ stats.inProgress || 0 }}</span><span class="lbl">承办中</span></div></el-card></el-col>
+      <el-col :xs="12" :sm="6"><el-card shadow="never"><div class="stat"><span class="num">{{ stats.closed || 0 }}</span><span class="lbl">已结案</span></div></el-card></el-col>
+      <el-col :xs="12" :sm="6"><el-card shadow="never"><div class="stat"><span class="num">{{ clients.length }}</span><span class="lbl">客户数</span></div></el-card></el-col>
     </el-row>
 
     <el-card>

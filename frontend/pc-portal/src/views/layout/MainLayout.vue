@@ -17,7 +17,7 @@
           <router-link to="/documents" @click="menuOpen = false">文书生成</router-link>
           <router-link to="/cases" @click="menuOpen = false">案例检索</router-link>
           <el-dropdown trigger="hover">
-            <span class="nav-more">更多服务</span>
+            <span class="nav-more">更多服务<el-icon class="nav-more-icon"><ArrowDown /></el-icon></span>
             <template #dropdown>
               <el-dropdown-item @click="$router.push('/templates'); menuOpen = false">合同模板</el-dropdown-item>
               <el-dropdown-item @click="$router.push('/toolbox'); menuOpen = false">法律工具箱</el-dropdown-item>
@@ -67,7 +67,7 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/store/user'
-import { Bell } from '@element-plus/icons-vue'
+import { Bell, ArrowDown } from '@element-plus/icons-vue'
 import { notificationApi } from '@/api'
 
 const router = useRouter()
@@ -100,17 +100,21 @@ onMounted(() => {
 .logo { display: flex; align-items: center; cursor: pointer; margin-right: 40px; }
 .logo-icon { font-size: 28px; margin-right: 8px; }
 .logo-text { font-size: 22px; font-weight: 700; color: #1a56db; }
-.main-nav { flex: 1; display: flex; gap: 24px; }
-.main-nav a { text-decoration: none; color: #333; font-size: 15px; transition: color .2s; white-space: nowrap; }
+.main-nav { flex: 1; display: flex; align-items: center; gap: 24px; }
+.main-nav a { text-decoration: none; color: #333; font-size: 15px; transition: color .2s; white-space: nowrap; line-height: 1; }
 .main-nav a:hover, .main-nav a.router-link-active { color: #1a56db; }
 .header-right { display: flex; align-items: center; gap: 12px; }
 .notify-badge { margin-right: 4px; }
 .notify-icon { font-size: 20px; cursor: pointer; color: #606266; transition: color .2s; }
 .notify-icon:hover { color: #1a56db; }
-.nav-more { color: #333; font-size: 15px; cursor: pointer; white-space: nowrap; }
+.nav-more { color: #333; font-size: 15px; cursor: pointer; white-space: nowrap; display: inline-flex; align-items: center; gap: 2px; line-height: 1; outline: none; }
 .nav-more:hover { color: #1a56db; }
-.user-info { display: flex; align-items: center; gap: 8px; cursor: pointer; }
+.nav-more:focus, .nav-more:focus-visible { outline: none; }
+.nav-more-icon { font-size: 12px; }
+.user-info { display: flex; align-items: center; gap: 8px; cursor: pointer; outline: none; }
+.user-info:focus, .user-info:focus-visible { outline: none; }
 .username { font-size: 14px; color: #333; }
+.main-nav :deep(.el-dropdown), .header-right :deep(.el-dropdown) { outline: none; }
 .site-main { flex: 1; background: #f5f7fa; }
 .site-footer { background: #1a1a2e; color: #999; text-align: center; padding: 24px; font-size: 13px; }
 .footer-inner { max-width: 1200px; margin: 0 auto; }

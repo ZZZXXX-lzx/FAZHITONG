@@ -5,7 +5,7 @@
       <p>AI智能咨询 · 专业律师服务</p>
     </div>
     <el-row :gutter="24">
-      <el-col :span="12">
+      <el-col :xs="24" :sm="12">
         <el-card>
           <template #header><strong>AI 智能咨询</strong></template>
           <p style="color:#666;margin-bottom:16px">7×24小时在线，立即解答您的法律问题</p>
@@ -18,7 +18,7 @@
           </div>
         </el-card>
       </el-col>
-      <el-col :span="12">
+      <el-col :xs="24" :sm="12">
         <el-card>
           <template #header><strong>律师在线咨询</strong></template>
           <p style="color:#666;margin-bottom:16px">专业律师团队，5分钟快速响应</p>

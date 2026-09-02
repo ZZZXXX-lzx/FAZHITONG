@@ -15,7 +15,7 @@
         <el-button type="primary" @click="startAnswer">重新体检</el-button>
       </div>
       <el-row :gutter="16" class="domain-grid">
-        <el-col :span="8" v-for="d in report.domains" :key="d.domain">
+        <el-col :xs="12" :sm="8" v-for="d in report.domains" :key="d.domain">
           <div class="domain-card">
             <div class="domain-name">{{ d.name }}</div>
             <div class="domain-score" :style="{ color: scoreColor(d.score) }">{{ d.score }}分</div>

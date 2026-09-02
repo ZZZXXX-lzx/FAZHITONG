@@ -5,7 +5,7 @@
       <p>海量常用合同模板，一键套用</p>
     </div>
     <el-row :gutter="20">
-      <el-col :span="6" v-for="item in templateCategories" :key="item.name">
+      <el-col :xs="12" :sm="6" v-for="item in templateCategories" :key="item.name">
         <el-card class="template-cat-card" shadow="hover" @click="$router.push('/documents')">
           <div class="cat-icon">{{ item.icon }}</div>
           <h3>{{ item.name }}</h3>

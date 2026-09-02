@@ -5,7 +5,7 @@
       <p>AI智能生成各类法律文书，提升办案效率</p>
     </div>
     <el-row :gutter="24">
-      <el-col :span="8" v-for="cat in lawyerDocTypes" :key="cat.name">
+      <el-col :xs="12" :sm="8" v-for="cat in lawyerDocTypes" :key="cat.name">
         <el-card class="doc-type-card" shadow="hover" @click="showGenerate(cat)">
           <div class="doc-icon">{{ cat.icon }}</div>
           <h3>{{ cat.name }}</h3>
