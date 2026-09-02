@@ -40,37 +40,17 @@
 </template>
 
 <script setup>
+import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/store/user'
-import { ElMessage } from 'element-plus'
-import {
-  Document, ChatDotRound, Search, Notebook, DocumentChecked, Reading,
-  User, Tools, ScaleToOriginal, OfficeBuilding, Connection,
-} from '@element-plus/icons-vue'
+import { allServicesFor } from '@/config/services'
 
 const router = useRouter()
 const userStore = useUserStore()
 
-const services = [
-  { icon: Document, color: '#1a56db', bg: '#e8effc', title: '文书生成', path: '/documents' },
-  { icon: ChatDotRound, color: '#0d9488', bg: '#e0f4f1', title: '法律咨询', path: '/consultation' },
-  { icon: Search, color: '#2563eb', bg: '#e6edfe', title: '案例检索', path: '/cases' },
-  { icon: Notebook, color: '#7c3aed', bg: '#f1e9fe', title: '法规检索', path: '/regulations' },
-  { icon: DocumentChecked, color: '#b45309', bg: '#fbf0dd', title: '合同模板', path: '/templates' },
-  { icon: Reading, color: '#0e9f6e', bg: '#e2f6ec', title: '知识库', path: '/knowledge' },
-  { icon: Connection, color: '#0891b2', bg: '#e0f2f7', title: '知识图谱', path: '/knowledge-graph' },
-  { icon: User, color: '#be185d', bg: '#fbe7f0', title: '找律师', path: '/lawyers' },
-  { icon: Tools, color: '#d97706', bg: '#fdf1dd', title: '工具箱', path: '/toolbox' },
-  { icon: ScaleToOriginal, color: '#7c3aed', bg: '#f1e9fe', title: '诉讼智能', path: '/litigation' },
-  { icon: OfficeBuilding, color: '#0d9488', bg: '#e0f4f1', title: '尽职调查', path: '/due-diligence' },
-]
+const services = computed(() => allServicesFor(userStore.userType, userStore.isLoggedIn))
 
 function goService(item) {
-  if (!userStore.isLoggedIn) {
-    ElMessage.info('请先登录使用完整功能')
-    router.push('/login')
-    return
-  }
   router.push(item.path)
 }
 </script>

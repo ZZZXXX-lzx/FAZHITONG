@@ -22,50 +22,22 @@
 </template>
 
 <script setup>
+import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/store/user'
 import { ElMessage } from 'element-plus'
-import {
-  Document, ChatDotRound, Search, Notebook, DocumentChecked, Reading,
-  User, Tools, Umbrella, ScaleToOriginal, OfficeBuilding, Connection,
-  Postcard, Bell, EditPen, Files, CircleCheck,
-} from '@element-plus/icons-vue'
+import { allServicesFor } from '@/config/services'
 
 const router = useRouter()
 const userStore = useUserStore()
 
-const services = [
-  { icon: Document, color: '#1a56db', bg: '#e8effc', title: '文书生成', path: '/documents' },
-  { icon: ChatDotRound, color: '#0d9488', bg: '#e0f4f1', title: '法律咨询', path: '/consultation' },
-  { icon: Search, color: '#2563eb', bg: '#e6edfe', title: '案例检索', path: '/cases' },
-  { icon: Notebook, color: '#7c3aed', bg: '#f1e9fe', title: '法规检索', path: '/regulations' },
-  { icon: DocumentChecked, color: '#b45309', bg: '#fbf0dd', title: '合同模板', path: '/templates' },
-  { icon: Reading, color: '#0e9f6e', bg: '#e2f6ec', title: '法律知识库', path: '/knowledge' },
-  { icon: Connection, color: '#0891b2', bg: '#e0f2f7', title: '知识图谱', path: '/knowledge-graph' },
-  { icon: User, color: '#be185d', bg: '#fbe7f0', title: '找律师', path: '/lawyers' },
-  { icon: Tools, color: '#d97706', bg: '#fdf1dd', title: '法律工具箱', path: '/toolbox' },
-  { icon: ScaleToOriginal, color: '#7c3aed', bg: '#f1e9fe', title: '诉讼智能', path: '/litigation' },
-  { icon: OfficeBuilding, color: '#0d9488', bg: '#e0f4f1', title: '尽职调查', path: '/due-diligence' },
-  { icon: Umbrella, color: '#c2410c', bg: '#fdeee4', title: '法律援助', path: '/legal-aid' },
-  { icon: Postcard, color: '#0e9f6e', bg: '#e2f6ec', title: '律师委托', path: '/lawyer-service' },
-  { icon: Bell, color: '#64748b', bg: '#eef1f5', title: '消息中心', path: '/notifications' },
-  { icon: EditPen, color: '#1a56db', bg: '#e8effc', title: '律师工作台', path: '/lawyer', role: 'LAWYER' },
-  { icon: Files, color: '#2563eb', bg: '#e6edfe', title: '合同管理', path: '/enterprise/contracts', role: 'ENTERPRISE' },
-  { icon: CircleCheck, color: '#0e9f6e', bg: '#e2f6ec', title: '合规体检', path: '/enterprise/compliance', role: 'ENTERPRISE' },
-  { icon: OfficeBuilding, color: '#b45309', bg: '#fbf0dd', title: '知识产权', path: '/enterprise/ip', role: 'ENTERPRISE' },
-]
+const services = computed(() => allServicesFor(userStore.userType, userStore.isLoggedIn))
 
 function goService(item) {
-  if (item.role && userStore.userType !== item.role) {
-    ElMessage.warning('该功能仅限对应账号使用')
+  if (item.roles && !userStore.isLoggedIn) {
+    ElMessage.info('请先登录')
+    router.push('/login')
     return
-  }
-  if (item.path === '/notifications' || item.path === '/legal-aid' || item.path === '/lawyer-service' || item.role) {
-    if (!userStore.isLoggedIn) {
-      ElMessage.info('请先登录')
-      router.push('/login')
-      return
-    }
   }
   router.push(item.path)
 }
