@@ -31,14 +31,38 @@
           </el-form-item>
           <el-form-item>
             <el-button type="primary" @click="calcLitigation">计算</el-button>
-            <el-button @click="litigation.result = null">清空</el-button>
+            <el-button @click="clearLitigation">清空</el-button>
           </el-form-item>
         </el-form>
-        <el-alert v-if="litigation.result !== null" type="success" :closable="false" style="margin-top: 16px">
-          <div class="result-text">诉讼费：{{ litigation.result.toFixed(2) }} 元</div>
-        </el-alert>
+
+        <template v-if="litigation.computed">
+          <el-alert type="success" :closable="false" style="margin-top: 16px">
+            <div class="result-text">诉讼费合计：{{ litigation.result.toFixed(2) }} 元</div>
+          </el-alert>
+          <div class="calc-steps">
+            <h4>计算过程</h4>
+            <div class="step">
+              <span class="step-no">1</span>
+              <div class="step-body">
+                <strong>按财产案件分段累进费率计算</strong>
+                <div class="deduct-list">
+                  <div class="deduct-row" v-for="(b, i) in litigation.breakdown" :key="i">
+                    <span>{{ b.label }}</span>
+                    <span>{{ b.fee.toFixed(2) }} 元</span>
+                  </div>
+                  <div class="deduct-row total">
+                    <span>诉讼费合计</span>
+                    <span>{{ litigation.result.toFixed(2) }} 元</span>
+                  </div>
+                </div>
+                <p>标的额 {{ litigation.amount.toFixed(2) }} 元，各区间费用累加即为应缴诉讼费。</p>
+              </div>
+            </div>
+          </div>
+        </template>
+
         <div class="rate-table">
-          <h4>收费标准</h4>
+          <h4>财产案件受理费收费标准</h4>
           <el-table :data="litigationRates" size="small" border>
             <el-table-column prop="range" label="金额区间" />
             <el-table-column prop="rate" label="费率" width="120" />
@@ -63,19 +87,36 @@
           </el-form-item>
           <el-form-item>
             <el-button type="primary" @click="calcInterest">计算</el-button>
-            <el-button @click="interest.simpleResult = null; interest.compoundResult = null">清空</el-button>
+            <el-button @click="clearInterest">清空</el-button>
           </el-form-item>
         </el-form>
-        <el-alert v-if="interest.simpleResult !== null" type="success" :closable="false" style="margin-top: 16px">
-          <div class="result-text">
-            简单利息：{{ interest.simpleResult.toFixed(2) }} 元 | 本息合计：{{ (interest.principal + interest.simpleResult).toFixed(2) }} 元
+
+        <template v-if="interest.computed">
+          <el-alert type="success" :closable="false" style="margin-top: 16px">
+            <div class="result-text">单利利息：{{ interest.simpleResult.toFixed(2) }} 元 ｜ 复利利息：{{ interest.compoundResult.toFixed(2) }} 元</div>
+          </el-alert>
+          <div class="calc-steps">
+            <h4>计算过程</h4>
+            <div class="step">
+              <span class="step-no">1</span>
+              <div class="step-body">
+                <strong>简单利息（单利，利息不计入本金）</strong>
+                <p>利息 = 本金 × 年利率 × 期限</p>
+                <p class="formula">{{ interest.principal.toFixed(2) }} × {{ interest.rate }}% × {{ interest.years }} = <b>{{ interest.simpleResult.toFixed(2) }}</b> 元</p>
+                <p class="formula">本息合计 = {{ interest.principal.toFixed(2) }} + {{ interest.simpleResult.toFixed(2) }} = <b>{{ interest.simpleTotal.toFixed(2) }}</b> 元</p>
+              </div>
+            </div>
+            <div class="step">
+              <span class="step-no">2</span>
+              <div class="step-body">
+                <strong>复利（利滚利，利息计入本金）</strong>
+                <p>本息合计 = 本金 × (1 + 年利率)^期限</p>
+                <p class="formula">{{ interest.principal.toFixed(2) }} × (1 + {{ interest.rate }}%)^{{ interest.years }} = <b>{{ interest.compoundTotal.toFixed(2) }}</b> 元</p>
+                <p class="formula">复利利息 = 本息合计 - 本金 = {{ interest.compoundTotal.toFixed(2) }} - {{ interest.principal.toFixed(2) }} = <b>{{ interest.compoundResult.toFixed(2) }}</b> 元</p>
+              </div>
+            </div>
           </div>
-        </el-alert>
-        <el-alert v-if="interest.compoundResult !== null" type="warning" :closable="false" style="margin-top: 12px">
-          <div class="result-text">
-            复利利息：{{ interest.compoundResult.toFixed(2) }} 元 | 本息合计：{{ (interest.principal + interest.compoundResult).toFixed(2) }} 元
-          </div>
-        </el-alert>
+        </template>
       </el-card>
 
       <!-- 工伤赔偿计算器 -->
@@ -276,10 +317,12 @@ const currentToolName = computed(() => {
 const litigation = reactive({
   amount: 100000,
   result: null,
+  computed: false,
+  breakdown: [],
 })
 
 const litigationRates = [
-  { range: '1万以下', rate: '50元（固定）' },
+  { range: '不超过 1 万元', rate: '50元（固定）' },
   { range: '1万 - 10万', rate: '2.5%' },
   { range: '10万 - 20万', rate: '2%' },
   { range: '20万 - 50万', rate: '1.5%' },
@@ -289,37 +332,40 @@ const litigationRates = [
   { range: '500万以上', rate: '0.7%' },
 ]
 
+function clearLitigation() {
+  litigation.result = null
+  litigation.computed = false
+  litigation.breakdown = []
+}
+
 function calcLitigation() {
-  const amount = litigation.amount
+  litigation.computed = true
+  const amount = litigation.amount || 0
   if (amount <= 0) {
     litigation.result = 0
+    litigation.breakdown = []
     return
   }
-  let fee = 0
   const segments = [
-    { max: 10000, rate: 0 },
-    { max: 100000, rate: 0.025 },
-    { max: 200000, rate: 0.02 },
-    { max: 500000, rate: 0.015 },
-    { max: 1000000, rate: 0.01 },
-    { max: 2000000, rate: 0.009 },
-    { max: 5000000, rate: 0.008 },
-    { max: Infinity, rate: 0.007 },
+    { min: 0, max: 10000, rate: 0, label: '不超过 1 万元（每件固定 50 元）' },
+    { min: 10000, max: 100000, rate: 0.025, label: '1万 - 10万部分 × 2.5%' },
+    { min: 100000, max: 200000, rate: 0.02, label: '10万 - 20万部分 × 2%' },
+    { min: 200000, max: 500000, rate: 0.015, label: '20万 - 50万部分 × 1.5%' },
+    { min: 500000, max: 1000000, rate: 0.01, label: '50万 - 100万部分 × 1%' },
+    { min: 1000000, max: 2000000, rate: 0.009, label: '100万 - 200万部分 × 0.9%' },
+    { min: 2000000, max: 5000000, rate: 0.008, label: '200万 - 500万部分 × 0.8%' },
+    { min: 5000000, max: Infinity, rate: 0.007, label: '超过 500万部分 × 0.7%' },
   ]
-  let prev = 0
+  let fee = 0
+  const breakdown = []
   for (const seg of segments) {
-    if (amount > prev) {
-      const portion = Math.min(amount, seg.max) - prev
-      if (prev === 0 && seg.max === 10000) {
-        fee += 50
-      } else {
-        fee += portion * seg.rate
-      }
-      prev = seg.max
-    } else {
-      break
-    }
+    if (amount <= seg.min) break
+    const portion = Math.min(amount, seg.max) - seg.min
+    const segFee = seg.min === 0 ? 50 : portion * seg.rate
+    fee += segFee
+    breakdown.push({ label: seg.label, fee: segFee })
   }
+  litigation.breakdown = breakdown
   litigation.result = fee
 }
 
@@ -330,21 +376,38 @@ const interest = reactive({
   years: 1,
   simpleResult: null,
   compoundResult: null,
+  simpleTotal: 0,
+  compoundTotal: 0,
+  computed: false,
 })
 
+function clearInterest() {
+  interest.simpleResult = null
+  interest.compoundResult = null
+  interest.simpleTotal = 0
+  interest.compoundTotal = 0
+  interest.computed = false
+}
+
 function calcInterest() {
-  const p = interest.principal
-  const r = interest.rate / 100
-  const n = interest.years
-  if (p <= 0 || r <= 0 || n <= 0) {
+  interest.computed = true
+  const p = interest.principal || 0
+  const rate = interest.rate || 0
+  const r = rate / 100
+  const n = interest.years || 0
+  if (p <= 0 || rate <= 0 || n <= 0) {
     interest.simpleResult = 0
     interest.compoundResult = 0
+    interest.simpleTotal = p
+    interest.compoundTotal = p
     return
   }
   // 简单利息: I = P * r * n
   interest.simpleResult = p * r * n
+  interest.simpleTotal = p + interest.simpleResult
   // 复利: A = P * (1 + r)^n, I = A - P
   interest.compoundResult = p * Math.pow(1 + r, n) - p
+  interest.compoundTotal = p + interest.compoundResult
 }
 
 // 工伤赔偿计算器

@@ -50,10 +50,12 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
+import { useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { documentApi } from '@/api'
 import { useUserStore } from '@/store/user'
 
+const route = useRoute()
 const userStore = useUserStore()
 
 const activeCategory = ref('')
@@ -72,6 +74,8 @@ const draftLoading = ref(false)
 const draftResult = ref('')
 
 onMounted(async () => {
+  const cat = route.query.category
+  if (cat) activeCategory.value = String(cat)
   try {
     categories.value = await documentApi.categories()
   } catch { /* 分类加载失败不阻塞 */ }

@@ -10,7 +10,7 @@
 import {
   Document, ChatDotRound, Search, Notebook, DocumentChecked, Reading,
   User, Tools, ScaleToOriginal, OfficeBuilding, Connection, Umbrella,
-  Postcard, EditPen, Files, CircleCheck, Folder,
+  Postcard, EditPen, Files, CircleCheck, Folder, Coin,
 } from '@element-plus/icons-vue'
 
 /** 通用服务（所有角色可见） */
@@ -46,6 +46,8 @@ export const enterpriseServices = [
   { icon: Files, color: '#2563eb', bg: '#e6edfe', title: '合同管理', desc: '合同审批、归档、到期提醒', path: '/enterprise/contracts', roles: ['ENTERPRISE'] },
   { icon: CircleCheck, color: '#0e9f6e', bg: '#e2f6ec', title: '合规体检', desc: '企业合规风险智能检测', path: '/enterprise/compliance', roles: ['ENTERPRISE'] },
   { icon: OfficeBuilding, color: '#b45309', bg: '#fbf0dd', title: '知识产权', desc: '商标、专利、著作权台账管理', path: '/enterprise/ip', roles: ['ENTERPRISE'] },
+  { icon: Coin, color: '#d97706', bg: '#fdf1dd', title: '投融资管理', desc: '融资轮次与对外投资台账', path: '/enterprise/investment', roles: ['ENTERPRISE'] },
+  { icon: DocumentChecked, color: '#0891b2', bg: '#e0f2f7', title: '法律审核', desc: '合同、文件、合规事项审核', path: '/enterprise/legal-review', roles: ['ENTERPRISE'] },
 ]
 
 /**

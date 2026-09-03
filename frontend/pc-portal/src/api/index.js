@@ -57,6 +57,15 @@ export const contractApi = {
   ipUpdate: (data) => request.put('/contract/ip', data),
   ipDelete: (id) => request.delete(`/contract/ip/${id}`),
   ipExpiring: (enterpriseId, days) => request.get('/contract/ip/expiring', { params: { enterpriseId, days } }),
+  investmentList: (params) => request.get('/contract/investment/list', { params }),
+  investmentCreate: (data) => request.post('/contract/investment', data),
+  investmentUpdate: (data) => request.put('/contract/investment', data),
+  investmentDelete: (id) => request.delete(`/contract/investment/${id}`),
+  legalReviewList: (params) => request.get('/contract/legal-review/list', { params }),
+  legalReviewCreate: (data) => request.post('/contract/legal-review', data),
+  legalReviewUpdate: (data) => request.put('/contract/legal-review', data),
+  legalReviewDelete: (id) => request.delete(`/contract/legal-review/${id}`),
+  legalReviewReview: (id, data) => request.post(`/contract/legal-review/${id}/review`, data),
 }
 
 export const caseApi = {

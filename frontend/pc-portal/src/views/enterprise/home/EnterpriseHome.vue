@@ -42,6 +42,8 @@ const enterpriseFeatures = [
   { icon: '📄', title: '合同管理', desc: '合同全生命周期管理，智能审查风险', path: '/enterprise/contracts' },
   { icon: '🔍', title: '合规体检', desc: 'AI智能扫描企业法律风险', path: '/enterprise/compliance' },
   { icon: '⚖️', title: '知识产权', desc: '商标、专利、著作权台账管理', path: '/enterprise/ip' },
+  { icon: '💰', title: '投融资管理', desc: '融资轮次与对外投资台账', path: '/enterprise/investment' },
+  { icon: '🔎', title: '法律审核', desc: '合同、文件、合规事项审核', path: '/enterprise/legal-review' },
   { icon: '💬', title: '企业咨询', desc: '专属律师团队，不限次咨询', path: '/consultation' },
   { icon: '📋', title: '合同模板', desc: '企业专属合同模板库', path: '/templates' },
 ]
