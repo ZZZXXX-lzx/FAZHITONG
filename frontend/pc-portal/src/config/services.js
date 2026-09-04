@@ -38,6 +38,7 @@ export const lawyerServices = [
   { icon: EditPen, color: '#1a56db', bg: '#e8effc', title: '律师工作台', desc: 'AI辅助办案、文书生成', path: '/lawyer', roles: ['LAWYER'] },
   { icon: Folder, color: '#0d9488', bg: '#e0f4f1', title: '案件管理', desc: '承办案件全流程管理', path: '/lawyer/cases', roles: ['LAWYER'] },
   { icon: User, color: '#be185d', bg: '#fbe7f0', title: '客户管理', desc: '客户台账与跟进管理', path: '/lawyer/clients', roles: ['LAWYER'] },
+  { icon: UserFilled, color: '#2563eb', bg: '#e6edfe', title: '团队管理', desc: '团队成员、角色与在职状态', path: '/lawyer/team', roles: ['LAWYER'] },
 ]
 
 /** 企业专属服务 */

@@ -21,6 +21,7 @@ const routes = [
       { path: 'lawyer/profile', name: 'LawyerProfile', component: () => import('@/views/lawyer/profile/LawyerProfile.vue'), meta: { title: '律师资料', roles: ['LAWYER', 'ADMIN'] } },
       { path: 'lawyer/cases', name: 'LawyerCases', component: () => import('@/views/lawyer/cases/CaseManage.vue'), meta: { title: '案件管理', roles: ['LAWYER', 'ADMIN'] } },
       { path: 'lawyer/clients', name: 'LawyerClients', component: () => import('@/views/lawyer/clients/ClientManage.vue'), meta: { title: '客户管理', roles: ['LAWYER', 'ADMIN'] } },
+      { path: 'lawyer/team', name: 'LawyerTeam', component: () => import('@/views/lawyer/team/TeamManage.vue'), meta: { title: '团队管理', roles: ['LAWYER', 'ADMIN'] } },
       { path: 'enterprise', name: 'EnterpriseHome', component: () => import('@/views/enterprise/home/EnterpriseHome.vue'), meta: { title: '企业工作台', roles: ['ENTERPRISE', 'ADMIN'] } },
       { path: 'enterprise/contracts', name: 'EnterpriseContracts', component: () => import('@/views/enterprise/contracts/ContractManage.vue'), meta: { title: '合同管理', roles: ['ENTERPRISE', 'ADMIN'] } },
       { path: 'enterprise/compliance', name: 'EnterpriseCompliance', component: () => import('@/views/enterprise/compliance/CompliancePage.vue'), meta: { title: '合规体检', roles: ['ENTERPRISE', 'ADMIN'] } },

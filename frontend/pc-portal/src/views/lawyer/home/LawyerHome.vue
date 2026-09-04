@@ -36,6 +36,7 @@
           <el-button style="width:100%;margin-bottom:12px" @click="$router.push('/cases')">案例检索</el-button>
           <el-button style="width:100%;margin-bottom:12px" @click="$router.push('/lawyer/cases')">案件管理</el-button>
           <el-button style="width:100%;margin-bottom:12px" @click="$router.push('/lawyer/clients')">客户管理</el-button>
+          <el-button style="width:100%;margin-bottom:12px" @click="$router.push('/lawyer/team')">团队管理</el-button>
           <el-button style="width:100%" @click="$router.push('/lawyer/profile')">律师资料管理</el-button>
         </el-card>
       </el-col>

@@ -41,6 +41,10 @@ export const consultationApi = {
   clientCreate: (data) => request.post('/consultation/client', data),
   clientUpdate: (data) => request.put('/consultation/client', data),
   clientDelete: (id) => request.delete(`/consultation/client/${id}`),
+  teamList: (params) => request.get('/consultation/team/list', { params }),
+  teamCreate: (data) => request.post('/consultation/team', data),
+  teamUpdate: (data) => request.put('/consultation/team', data),
+  teamDelete: (id) => request.delete(`/consultation/team/${id}`),
 }
 
 export const contractApi = {
