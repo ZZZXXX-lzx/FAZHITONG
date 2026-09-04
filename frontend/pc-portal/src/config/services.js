@@ -10,7 +10,7 @@
 import {
   Document, ChatDotRound, Search, Notebook, DocumentChecked, Reading,
   User, Tools, ScaleToOriginal, OfficeBuilding, Connection, Umbrella,
-  Postcard, EditPen, Files, CircleCheck, Folder, Coin,
+  Postcard, EditPen, Files, CircleCheck, Folder, Coin, UserFilled,
 } from '@element-plus/icons-vue'
 
 /** 通用服务（所有角色可见） */

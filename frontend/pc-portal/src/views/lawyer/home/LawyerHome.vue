@@ -161,4 +161,11 @@ async function submitAnswer() {
 .page-header p { color: #666; }
 .consult-item { padding: 12px 0; border-bottom: 1px solid #f0f0f0; }
 .consult-item:last-child { border-bottom: none; }
+.stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 20px; }
+.stat-card { text-align: center; }
+.stat-num { font-size: 26px; font-weight: 700; }
+.stat-label { color: #999; font-size: 13px; margin-top: 6px; }
+@media (max-width: 768px) {
+  .stat-grid { grid-template-columns: repeat(2, 1fr); }
+}
 </style>
