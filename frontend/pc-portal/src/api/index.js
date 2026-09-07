@@ -89,6 +89,7 @@ export const regulationApi = {
   search: (params) => request.get('/case/regulation/search', { params }),
   getById: (id) => request.get(`/case/regulation/${id}`),
   getDetail: (id) => request.get(`/case/regulation/${id}/detail`),
+  articles: (id) => request.get(`/case/regulation/${id}/articles`),
 }
 
 export const paymentApi = {

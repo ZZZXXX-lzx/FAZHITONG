@@ -18,7 +18,7 @@ export const commonServices = [
   { icon: Document, color: '#1a56db', bg: '#e8effc', title: '文书生成', desc: 'AI智能生成起诉状、答辩状等法律文书', path: '/documents' },
   { icon: ChatDotRound, color: '#0d9488', bg: '#e0f4f1', title: '法律咨询', desc: '7×15小时在线咨询，5分钟快速响应', path: '/consultation' },
   { icon: Search, color: '#2563eb', bg: '#e6edfe', title: '案例检索', desc: '千万级裁判文书智能检索', path: '/cases' },
-  { icon: Notebook, color: '#7c3aed', bg: '#f1e9fe', title: '法规检索', desc: '法律法规、司法解释快速查询', path: '/regulations' },
+  { icon: Notebook, color: '#1a56db', bg: '#e8effc', title: '法律法规库', desc: '法律法规、行政法规、司法解释全文库', path: '/regulations' },
   { icon: DocumentChecked, color: '#b45309', bg: '#fbf0dd', title: '合同模板', desc: '海量合同模板一键套用', path: '/templates' },
   { icon: Reading, color: '#0e9f6e', bg: '#e2f6ec', title: '法律知识库', desc: '法律法规、法律常识、专业解读', path: '/knowledge' },
   { icon: Connection, color: '#0891b2', bg: '#e0f2f7', title: '法律知识图谱', desc: '领域、法规、概念关联关系可视化', path: '/knowledge-graph' },

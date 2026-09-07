@@ -6,15 +6,17 @@ import com.fazhitong.casemgt.entity.Regulation;
 import com.fazhitong.casemgt.entity.RegulationArticle;
 import com.fazhitong.casemgt.mapper.RegulationArticleMapper;
 import com.fazhitong.casemgt.mapper.RegulationMapper;
+import com.fazhitong.casemgt.dto.RegulationImportRow;
+import com.fazhitong.casemgt.dto.ImportResult;
 import com.fazhitong.common.dto.PageParam;
 import com.fazhitong.common.dto.PageResult;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 @RequiredArgsConstructor
@@ -130,5 +132,155 @@ public class RegulationService {
             count++;
         }
         return count;
+    }
+
+    private static final Pattern ARTICLE_HEAD = Pattern.compile("^(第[一二三四五六七八九十百零0-9〇]+条)(?=[\\s\u3000。，、：:；;．.~～-]|$)");
+
+    /** 全文文本切条：仅当一行以"第X条"开头时视为新条文，避免正文中"第X条"引用被误切 */
+    private List<RegulationArticle> splitArticles(String text) {
+        List<RegulationArticle> out = new ArrayList<>();
+        RegulationArticle cur = null;
+        for (String raw : text.split("\r?\n")) {
+            String t = raw.trim();
+            if (t.isEmpty()) continue;
+            Matcher m = ARTICLE_HEAD.matcher(t);
+            if (m.find()) {
+                cur = new RegulationArticle();
+                cur.setArticleNo(m.group(1));
+                cur.setContent(t.substring(m.group(1).length()).trim());
+                out.add(cur);
+            } else {
+                if (cur == null) {
+                    cur = new RegulationArticle();
+                    cur.setArticleNo("");
+                    cur.setContent("");
+                    out.add(cur);
+                }
+                cur.setContent(cur.getContent() + (cur.getContent().isEmpty() ? "" : "\n") + t);
+            }
+        }
+        boolean hasHead = out.stream().anyMatch(a -> a.getArticleNo() != null && !a.getArticleNo().isEmpty());
+        if (!hasHead) {
+            out.clear();
+            RegulationArticle a = new RegulationArticle();
+            a.setContent(text.trim());
+            out.add(a);
+        }
+        return out;
+    }
+}
+        ImportResult result = new ImportResult();
+        if (rows == null || rows.isEmpty()) {
+            return result;
+        }
+        // 按法规名称分组（保持文件顺序）
+        Map<String, List<RegulationImportRow>> grouped = new LinkedHashMap<>();
+        for (RegulationImportRow row : rows) {
+            if (row.getTitle() == null || row.getTitle().isBlank()) continue;
+            grouped.computeIfAbsent(row.getTitle().trim(), k -> new ArrayList<>()).add(row);
+        }
+
+        for (Map.Entry<String, List<RegulationImportRow>> e : grouped.entrySet()) {
+            List<RegulationImportRow> lawRows = e.getValue();
+            RegulationImportRow first = lawRows.get(0);
+
+            // 解析出该法规的全部条文
+            List<RegulationArticle> articles = new ArrayList<>();
+            for (RegulationImportRow row : lawRows) {
+                String body = row.getArticleContent();
+                if (body == null || body.isBlank()) {
+                    result.setSkipped(result.getSkipped() + 1);
+                    continue;
+                }
+                body = body.trim();
+                String no = row.getArticleNo();
+                if (no != null && !no.isBlank()) {
+                    articles.add(buildArticle(no.trim(), body));
+                } else {
+                    articles.addAll(splitArticles(body));
+                }
+            }
+
+            Regulation existing = regulationMapper.selectOne(
+                    new LambdaQueryWrapper<Regulation>().eq(Regulation::getTitle, e.getKey()));
+            if (existing == null) {
+                Regulation reg = buildRegulation(first);
+                reg.setId(null);
+                regulationMapper.insert(reg);
+                for (RegulationArticle a : articles) {
+                    a.setId(null);
+                    a.setRegulationId(reg.getId());
+                    articleMapper.insert(a);
+                }
+                result.setCreatedRegulations(result.getCreatedRegulations() + 1);
+                result.setProvisions(result.getProvisions() + articles.size());
+            } else {
+                for (RegulationArticle a : articles) {
+                    a.setId(null);
+                    a.setRegulationId(existing.getId());
+                    articleMapper.insert(a);
+                }
+                result.setAppendedRegulations(result.getAppendedRegulations() + 1);
+                result.setProvisions(result.getProvisions() + articles.size());
+            }
+        }
+        return result;
+    }
+
+    private Regulation buildRegulation(RegulationImportRow row) {
+        Regulation reg = new Regulation();
+        reg.setTitle(row.getTitle());
+        reg.setLawType(row.getLawType() == null ? "法律" : row.getLawType());
+        reg.setIssuingAuthority(row.getIssuingAuthority());
+        reg.setPublishDate(row.getPublishDate());
+        reg.setEffectiveDate(row.getEffectiveDate());
+        reg.setStatus(row.getStatus() == null ? "现行有效" : row.getStatus());
+        reg.setKeywords(row.getKeywords());
+        reg.setContent(row.getOverview());
+        return reg;
+    }
+
+    private RegulationArticle buildArticle(String no, String body) {
+        RegulationArticle a = new RegulationArticle();
+        a.setArticleNo(no);
+        a.setContent(body);
+        return a;
+    }
+
+    /** 全文文本按 "第X条" 切分为多条；首段若为无条的引言，作为第0条并入 */
+    private List<RegulationArticle> splitArticles(String text) {
+        List<RegulationArticle> out = new ArrayList<>();
+        Matcher m = ARTICLE_MARK.matcher(text);
+        List<Integer> starts = new ArrayList<>();
+        List<String> nos = new ArrayList<>();
+        while (m.find()) {
+            starts.add(m.start());
+            nos.add(extractNo(text, m.start()));
+        }
+        if (starts.isEmpty()) {
+            out.add(buildArticle("", text));
+            return out;
+        }
+        // 引言
+        if (starts.get(0) > 0) {
+            String pre = text.substring(0, starts.get(0)).trim();
+            if (!pre.isEmpty()) out.add(buildArticle("", pre));
+        }
+        for (int i = 0; i < starts.size(); i++) {
+            int begin = starts.get(i);
+            int end = (i + 1 < starts.size()) ? starts.get(i + 1) : text.length();
+            out.add(buildArticle(nos.get(i), text.substring(begin, end).trim()));
+        }
+        return out;
+    }
+
+    private String extractNo(String text, int start) {
+        int end = start;
+        while (end < text.length()) {
+            char c = text.charAt(end);
+            if (c == '条') { end = end + 1; break; }
+            end++;
+        }
+        return text.substring(start, Math.min(end, text.length())).trim();
     }
 }

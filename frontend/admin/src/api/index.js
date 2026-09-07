@@ -58,6 +58,9 @@ export const regulationApi = {
   updateArticle: (articleId, data) => request.put(`/case/regulation/articles/${articleId}`, data),
   deleteArticle: (articleId) => request.delete(`/case/regulation/articles/${articleId}`),
   importRegulations: (list) => request.post('/case/regulation/import', list),
+  importFile: (formData) => request.post('/case/regulation/import-file', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  }),
 }
 
 export const paymentApi = {

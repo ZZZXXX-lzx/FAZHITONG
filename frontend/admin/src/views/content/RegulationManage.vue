@@ -130,10 +130,38 @@
 
     <!-- 批量导入 -->
     <el-dialog v-model="importDialogVisible" title="批量导入法规" width="720px">
-      <p style="color:#666;margin-bottom:8px;font-size:13px">
-        粘贴 JSON 数组，每条含 title/lawType/issuingAuthority/publishDate/effectiveDate/status/keywords/content，可选 articles（条文数组：articleNo/content）。更多数据可从国家法律法规数据库等权威源整理后导入。
-      </p>
-      <el-input v-model="importText" type="textarea" :rows="12" placeholder='[{"title":"中华人民共和国××法","lawType":"法律","issuingAuthority":"全国人民代表大会","publishDate":"2020-01-01","effectiveDate":"2020-07-01","status":"现行有效","keywords":"","content":"摘要","articles":[{"articleNo":"第一条","content":"条文全文"}]}]' />
+      <el-tabs v-model="importMode">
+        <el-tab-pane label="上传文件（Excel/CSV）" name="file">
+          <div style="margin-bottom:12px">
+            <el-upload
+              drag
+              :auto-upload="false"
+              :limit="1"
+              accept=".xlsx,.xls,.csv"
+              :on-change="onFileChange"
+              :on-remove="() => (importFile = null)"
+              style="width:100%"
+            >
+              <el-icon style="font-size:40px;color:#c0c4cc"><upload-filled /></el-icon>
+              <div>拖拽文件到此处，或点击选择</div>
+              <div class="el-upload__tip" slot="tip" style="font-size:12px">支持 .xlsx / .xls / .csv，每行一条（或一段全文），同一法规名称自动合并。</div>
+            </el-upload>
+          </div>
+          <div v-if="importFile" style="color:#67c23a;margin-bottom:8px">已选择：{{ importFile.name }}</div>
+          <p style="color:#666;font-size:13px;line-height:1.7">
+            表头用列名：<b>法规名称、法规类型、制定机关、发布日期、施行日期、效力状态、关键词、法规简介、条文序号、条文内容</b>。<br>
+            · 一行对应一条条文；同一「法规名称」的多行会合并为一部法规。<br>
+            · 「条文内容」里若是一段包含"第X条"的全文，会自动切条。<br>
+            · 若〈法规名称〉已存在，仅追加条文，不重复建法规。
+          </p>
+        </el-tab-pane>
+        <el-tab-pane label="粘贴 JSON" name="json">
+          <p style="color:#666;margin-bottom:8px;font-size:13px">
+            粘贴 JSON 数组，每条含 title/lawType/issuingAuthority/publishDate/effectiveDate/status/keywords/content，可选 articles（条文数组：articleNo/content）。
+          </p>
+          <el-input v-model="importText" type="textarea" :rows="14" placeholder='[{"title":"中华人民共和国××法","lawType":"法律","publishDate":"2020-07-01","content":"摘要","articles":[{"articleNo":"第一条","content":"条文全文"}]}]' />
+        </el-tab-pane>
+      </el-tabs>
       <template #footer>
         <el-button @click="importDialogVisible = false">取消</el-button>
         <el-button type="primary" :loading="importing" @click="doImport">导入</el-button>
@@ -333,13 +361,51 @@ async function deleteArticle(article) {
 const importDialogVisible = ref(false)
 const importing = ref(false)
 const importText = ref('')
+const importMode = ref('file')
+const importFile = ref(null)
 
 function openImportDialog() {
   importText.value = ''
+  importFile.value = null
+  importMode.value = 'file'
   importDialogVisible.value = true
 }
 
+function onFileChange(uploadFile) {
+  importFile.value = uploadFile.raw || null
+}
+
+function fileSizeOk() {
+  return importFile.value && importFile.value.size <= 50 * 1024 * 1024
+}
+
 async function doImport() {
+  if (importMode.value === 'file') {
+    if (!importFile.value) {
+      ElMessage.warning('请先选择文件')
+      return
+    }
+    if (!fileSizeOk()) {
+      ElMessage.error('文件过大（>50MB）')
+      return
+    }
+    const fd = new FormData()
+    fd.append('file', importFile.value)
+    importing.value = true
+    try {
+      const res = await regulationApi.importFile(fd)
+      ElMessage.success(`导入完成：新建 ${res.createdRegulations} 部，追加 ${res.appendedRegulations} 部，共条文 ${res.provisions} 条`)
+      importDialogVisible.value = false
+      page.value = 1
+      fetchList()
+    } catch {
+      ElMessage.error('文件导入失败，请检查文件格式')
+    } finally {
+      importing.value = false
+    }
+    return
+  }
+
   let parsed
   try {
     parsed = JSON.parse(importText.value)

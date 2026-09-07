@@ -16,6 +16,7 @@
           <router-link to="/consultation" @click="menuOpen = false">法律咨询</router-link>
           <router-link to="/documents" @click="menuOpen = false">文书生成</router-link>
           <router-link to="/cases" @click="menuOpen = false">案例检索</router-link>
+          <router-link to="/regulations" @click="menuOpen = false">法律法规库</router-link>
           <el-dropdown trigger="hover">
             <span class="nav-more">更多服务<el-icon class="nav-more-icon"><ArrowDown /></el-icon></span>
             <template #dropdown>

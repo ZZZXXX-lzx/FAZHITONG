@@ -3,12 +3,17 @@ package com.fazhitong.casemgt.controller;
 import com.fazhitong.casemgt.entity.Regulation;
 import com.fazhitong.casemgt.entity.RegulationArticle;
 import com.fazhitong.casemgt.service.RegulationService;
+import com.fazhitong.casemgt.dto.RegulationImportRow;
+import com.fazhitong.casemgt.dto.ImportResult;
+import com.fazhitong.casemgt.util.RegulationFileParser;
 import com.fazhitong.common.dto.ApiResult;
 import com.fazhitong.common.dto.PageParam;
 import com.fazhitong.common.dto.PageResult;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -84,5 +89,13 @@ public class RegulationController {
     @PostMapping("/import")
     public ApiResult<Integer> importRegulations(@RequestBody List<Regulation> list) {
         return ApiResult.success(regulationService.importRegulations(list));
+    }
+
+    @PostMapping("/import-file")
+    public ApiResult<ImportResult> importFile(@RequestParam("file") MultipartFile file) throws IOException {
+        List<RegulationImportRow> rows = RegulationFileParser.parse(
+                file.getOriginalFilename() == null ? "data.csv" : file.getOriginalFilename(),
+                file.getInputStream());
+        return ApiResult.success(regulationService.importRows(rows));
     }
 }
