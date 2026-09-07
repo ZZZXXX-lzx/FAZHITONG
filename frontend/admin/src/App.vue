@@ -32,6 +32,10 @@
           <el-icon><reading /></el-icon>
           <span>知识库管理</span>
         </el-menu-item>
+        <el-menu-item index="/regulation-manage">
+          <el-icon><collection /></el-icon>
+          <span>法规管理</span>
+        </el-menu-item>
         <el-menu-item index="/finance">
           <el-icon><money /></el-icon>
           <span>财务管理</span>

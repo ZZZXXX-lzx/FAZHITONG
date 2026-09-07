@@ -9,6 +9,7 @@ const routes = [
   { path: '/enterprises', name: 'Enterprises', component: () => import('@/views/user/EnterpriseManage.vue'), meta: { requiresAuth: true, title: '企业管理' } },
   { path: '/content', name: 'Content', component: () => import('@/views/content/ContentManage.vue'), meta: { requiresAuth: true, title: '内容管理' } },
   { path: '/knowledge-manage', name: 'KnowledgeManage', component: () => import('@/views/content/KnowledgeManage.vue'), meta: { requiresAuth: true, title: '知识库管理' } },
+  { path: '/regulation-manage', name: 'RegulationManage', component: () => import('@/views/content/RegulationManage.vue'), meta: { requiresAuth: true, title: '法规管理' } },
   { path: '/finance', name: 'Finance', component: () => import('@/views/finance/FinancePage.vue'), meta: { requiresAuth: true, title: '财务管理' } },
   { path: '/system/roles', name: 'Roles', component: () => import('@/views/system/RoleManage.vue'), meta: { requiresAuth: true, title: '角色管理' } },
   { path: '/system/config', name: 'Config', component: () => import('@/views/system/SystemConfig.vue'), meta: { requiresAuth: true, title: '系统配置' } },

@@ -40,7 +40,7 @@
     <el-empty v-if="!loading && !list.length" description="未检索到相关法规" />
     <el-pagination v-if="total > size" background layout="prev, pager, next" :total="total" :page-size="size" @current-change="onPageChange" style="margin-top:20px;text-align:center" />
 
-    <el-dialog v-model="detailVisible" :title="detail?.title" width="720px">
+    <el-dialog v-model="detailVisible" :title="detail?.title" width="760px" top="6vh">
       <template v-if="detail">
         <div class="reg-meta" style="margin-bottom:16px">
           <el-tag size="small" type="info">{{ detail.lawType }}</el-tag>
@@ -49,14 +49,28 @@
           <span>施行：{{ detail.effectiveDate || '—' }}</span>
           <el-tag v-if="detail.status === '现行有效'" type="success" size="small">现行有效</el-tag>
         </div>
-        <div class="reg-content">{{ detail.content }}</div>
+        <div class="reg-content" v-if="detail.content">{{ detail.content }}</div>
+
+        <div v-if="articles.length" style="margin-top:16px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+            <strong>条文（{{ filteredArticles.length }}/{{ articles.length }}）</strong>
+            <el-input v-model="articleKeyword" placeholder="在本法条内搜索，如：试用期、赔偿" clearable size="small" style="width:200px" />
+          </div>
+          <div class="article-list">
+            <div class="article-item" v-for="a in filteredArticles" :key="a.id">
+              <div class="article-no">{{ a.articleNo }}</div>
+              <div class="article-body">{{ a.content }}</div>
+            </div>
+          </div>
+        </div>
+        <el-empty v-else-if="detailLoaded" description="暂未录入条文全文" style="margin-top:8px" />
       </template>
     </el-dialog>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { regulationApi } from '@/api'
 
@@ -69,6 +83,17 @@ const size = ref(10)
 const loading = ref(false)
 const detailVisible = ref(false)
 const detail = ref(null)
+const articles = ref([])
+const articleKeyword = ref('')
+const detailLoaded = ref(false)
+
+const filteredArticles = computed(() => {
+  const k = articleKeyword.value.trim()
+  if (!k) return articles.value
+  const lower = k.toLowerCase()
+  return articles.value.filter((a) =>
+    (a.articleNo || '').toLowerCase().includes(lower) || (a.content || '').toLowerCase().includes(lower))
+})
 
 onMounted(search)
 
@@ -92,9 +117,23 @@ async function load() {
 
 function onPageChange(p) { page.value = p; load() }
 
-function viewDetail(item) {
+async function viewDetail(item) {
   detail.value = item
   detailVisible.value = true
+  articles.value = []
+  articleKeyword.value = ''
+  detailLoaded.value = false
+  try {
+    const data = await regulationApi.getDetail(item.id)
+    if (data) {
+      detail.value = data
+      articles.value = (data && data.articles) || []
+    }
+  } catch {
+    articles.value = []
+  } finally {
+    detailLoaded.value = true
+  }
 }
 </script>
 
@@ -109,4 +148,8 @@ function viewDetail(item) {
 .reg-meta { display: flex; align-items: center; gap: 14px; color: #999; font-size: 13px; margin: 8px 0; }
 .reg-abstract { color: #666; font-size: 14px; line-height: 1.7; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 .reg-content { white-space: pre-wrap; line-height: 1.8; color: #333; background: #f9f9f9; padding: 16px; border-radius: 8px; max-height: 460px; overflow-y: auto; }
+.article-list { max-height: 480px; overflow-y: auto; border-top: 1px solid #eee; }
+.article-item { display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px solid #f0f0f0; }
+.article-no { flex: none; font-weight: 600; color: #1a56db; width: 80px; }
+.article-body { line-height: 1.8; color: #333; white-space: pre-wrap; }
 </style>

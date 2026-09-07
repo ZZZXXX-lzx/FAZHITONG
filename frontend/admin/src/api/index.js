@@ -46,6 +46,20 @@ export const caseApi = {
   getById: (id) => request.get(`/case/${id}`),
 }
 
+export const regulationApi = {
+  search: (params) => request.get('/case/regulation/search', { params }),
+  getById: (id) => request.get(`/case/regulation/${id}`),
+  getDetail: (id) => request.get(`/case/regulation/${id}/detail`),
+  articles: (id) => request.get(`/case/regulation/${id}/articles`),
+  create: (data) => request.post('/case/regulation', data),
+  update: (data) => request.put('/case/regulation', data),
+  remove: (id) => request.delete(`/case/regulation/${id}`),
+  addArticle: (id, data) => request.post(`/case/regulation/${id}/articles`, data),
+  updateArticle: (articleId, data) => request.put(`/case/regulation/articles/${articleId}`, data),
+  deleteArticle: (articleId) => request.delete(`/case/regulation/articles/${articleId}`),
+  importRegulations: (list) => request.post('/case/regulation/import', list),
+}
+
 export const paymentApi = {
   orders: (params) => request.get('/payment/admin/orders', { params }),
 }

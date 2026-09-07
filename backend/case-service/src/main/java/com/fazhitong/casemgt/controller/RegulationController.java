@@ -1,12 +1,15 @@
 package com.fazhitong.casemgt.controller;
 
 import com.fazhitong.casemgt.entity.Regulation;
+import com.fazhitong.casemgt.entity.RegulationArticle;
 import com.fazhitong.casemgt.service.RegulationService;
 import com.fazhitong.common.dto.ApiResult;
 import com.fazhitong.common.dto.PageParam;
 import com.fazhitong.common.dto.PageResult;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/case/regulation")
@@ -26,5 +29,60 @@ public class RegulationController {
     @GetMapping("/{id}")
     public ApiResult<Regulation> getById(@PathVariable Long id) {
         return ApiResult.success(regulationService.getById(id));
+    }
+
+    @GetMapping("/{id}/detail")
+    public ApiResult<Regulation> detail(@PathVariable Long id) {
+        return ApiResult.success(regulationService.getDetail(id));
+    }
+
+    @GetMapping("/{id}/articles")
+    public ApiResult<List<RegulationArticle>> articles(@PathVariable Long id) {
+        return ApiResult.success(regulationService.listArticles(id));
+    }
+
+    // ---------- 管理端 CRUD ----------
+
+    @PostMapping
+    public ApiResult<Regulation> create(@RequestBody Regulation regulation) {
+        return ApiResult.success(regulationService.create(regulation));
+    }
+
+    @PutMapping
+    public ApiResult<Regulation> update(@RequestBody Regulation regulation) {
+        return ApiResult.success(regulationService.update(regulation));
+    }
+
+    @DeleteMapping("/{id}")
+    public ApiResult<Void> delete(@PathVariable Long id) {
+        regulationService.delete(id);
+        return ApiResult.success();
+    }
+
+    @PostMapping("/{id}/articles")
+    public ApiResult<RegulationArticle> createArticle(@PathVariable Long id,
+                                                      @RequestBody RegulationArticle article) {
+        article.setRegulationId(id);
+        regulationService.createArticle(article);
+        return ApiResult.success(article);
+    }
+
+    @PutMapping("/articles/{articleId}")
+    public ApiResult<RegulationArticle> updateArticle(@PathVariable Long articleId,
+                                                      @RequestBody RegulationArticle article) {
+        article.setId(articleId);
+        regulationService.updateArticle(article);
+        return ApiResult.success(article);
+    }
+
+    @DeleteMapping("/articles/{articleId}")
+    public ApiResult<Void> deleteArticle(@PathVariable Long articleId) {
+        regulationService.deleteArticle(articleId);
+        return ApiResult.success();
+    }
+
+    @PostMapping("/import")
+    public ApiResult<Integer> importRegulations(@RequestBody List<Regulation> list) {
+        return ApiResult.success(regulationService.importRegulations(list));
     }
 }

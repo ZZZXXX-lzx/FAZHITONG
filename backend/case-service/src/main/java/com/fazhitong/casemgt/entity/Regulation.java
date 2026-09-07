@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.annotation.*;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @TableName("regulation")
@@ -18,6 +19,8 @@ public class Regulation {
     private String status;
     private String content;
     private String keywords;
+    @TableField(exist = false)
+    private List<RegulationArticle> articles;
     @TableField(fill = FieldFill.INSERT)
     private LocalDateTime createTime;
 }
