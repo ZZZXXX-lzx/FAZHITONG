@@ -13,7 +13,7 @@ import re
 import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-HEAD = re.compile(r'^第[一二三四五六七八九十百千万零〇0-9]+条')
+HEAD = re.compile(r'^第[一二三四五六七八九十百千万零〇0-9]+条(?:之[一二三四五六七八九十]+)?')
 
 
 def strip_html(h: str) -> str:

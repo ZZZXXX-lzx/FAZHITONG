@@ -134,41 +134,9 @@ public class RegulationService {
         return count;
     }
 
-    private static final Pattern ARTICLE_HEAD = Pattern.compile("^(第[一二三四五六七八九十百零0-9〇]+条)(?=[\\s\u3000。，、：:；;．.~～-]|$)");
-
-    /** 全文文本切条：仅当一行以"第X条"开头时视为新条文，避免正文中"第X条"引用被误切 */
-    private List<RegulationArticle> splitArticles(String text) {
-        List<RegulationArticle> out = new ArrayList<>();
-        RegulationArticle cur = null;
-        for (String raw : text.split("\r?\n")) {
-            String t = raw.trim();
-            if (t.isEmpty()) continue;
-            Matcher m = ARTICLE_HEAD.matcher(t);
-            if (m.find()) {
-                cur = new RegulationArticle();
-                cur.setArticleNo(m.group(1));
-                cur.setContent(t.substring(m.group(1).length()).trim());
-                out.add(cur);
-            } else {
-                if (cur == null) {
-                    cur = new RegulationArticle();
-                    cur.setArticleNo("");
-                    cur.setContent("");
-                    out.add(cur);
-                }
-                cur.setContent(cur.getContent() + (cur.getContent().isEmpty() ? "" : "\n") + t);
-            }
-        }
-        boolean hasHead = out.stream().anyMatch(a -> a.getArticleNo() != null && !a.getArticleNo().isEmpty());
-        if (!hasHead) {
-            out.clear();
-            RegulationArticle a = new RegulationArticle();
-            a.setContent(text.trim());
-            out.add(a);
-        }
-        return out;
-    }
-}
+    /** 表格/文件导入：按法规名称分组，新建或追加条文 */
+    @Transactional
+    public ImportResult importRows(List<RegulationImportRow> rows) {
         ImportResult result = new ImportResult();
         if (rows == null || rows.isEmpty()) {
             return result;
@@ -247,40 +215,38 @@ public class RegulationService {
         return a;
     }
 
-    /** 全文文本按 "第X条" 切分为多条；首段若为无条的引言，作为第0条并入 */
+    private static final Pattern ARTICLE_HEAD = Pattern.compile("^(第[一二三四五六七八九十百零0-9〇]+条(?:之[一二三四五六七八九十]+)?)(?=[\\s\u3000。，、：:；;．.~～-]|$)");
+
+    /** 全文文本切条：仅当一行以"第X条"开头时视为新条文，避免正文中"第X条"引用被误切 */
     private List<RegulationArticle> splitArticles(String text) {
         List<RegulationArticle> out = new ArrayList<>();
-        Matcher m = ARTICLE_MARK.matcher(text);
-        List<Integer> starts = new ArrayList<>();
-        List<String> nos = new ArrayList<>();
-        while (m.find()) {
-            starts.add(m.start());
-            nos.add(extractNo(text, m.start()));
+        RegulationArticle cur = null;
+        for (String raw : text.split("\r?\n")) {
+            String t = raw.trim();
+            if (t.isEmpty()) continue;
+            Matcher m = ARTICLE_HEAD.matcher(t);
+            if (m.find()) {
+                cur = new RegulationArticle();
+                cur.setArticleNo(m.group(1));
+                cur.setContent(t.substring(m.group(1).length()).trim());
+                out.add(cur);
+            } else {
+                if (cur == null) {
+                    cur = new RegulationArticle();
+                    cur.setArticleNo("");
+                    cur.setContent("");
+                    out.add(cur);
+                }
+                cur.setContent(cur.getContent() + (cur.getContent().isEmpty() ? "" : "\n") + t);
+            }
         }
-        if (starts.isEmpty()) {
-            out.add(buildArticle("", text));
-            return out;
-        }
-        // 引言
-        if (starts.get(0) > 0) {
-            String pre = text.substring(0, starts.get(0)).trim();
-            if (!pre.isEmpty()) out.add(buildArticle("", pre));
-        }
-        for (int i = 0; i < starts.size(); i++) {
-            int begin = starts.get(i);
-            int end = (i + 1 < starts.size()) ? starts.get(i + 1) : text.length();
-            out.add(buildArticle(nos.get(i), text.substring(begin, end).trim()));
+        boolean hasHead = out.stream().anyMatch(a -> a.getArticleNo() != null && !a.getArticleNo().isEmpty());
+        if (!hasHead) {
+            out.clear();
+            RegulationArticle a = new RegulationArticle();
+            a.setContent(text.trim());
+            out.add(a);
         }
         return out;
-    }
-
-    private String extractNo(String text, int start) {
-        int end = start;
-        while (end < text.length()) {
-            char c = text.charAt(end);
-            if (c == '条') { end = end + 1; break; }
-            end++;
-        }
-        return text.substring(start, Math.min(end, text.length())).trim();
     }
 }
