@@ -21,6 +21,10 @@ public class Regulation {
     private String keywords;
     @TableField(exist = false)
     private List<RegulationArticle> articles;
+    @TableField(exist = false)
+    private Long articleCount;
+    @TableField(exist = false)
+    private List<RegulationArticle> matchArticles;
     @TableField(fill = FieldFill.INSERT)
     private LocalDateTime createTime;
 }

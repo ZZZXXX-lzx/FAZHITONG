@@ -52,6 +52,12 @@
             </div>
             <h3 class="law-title">{{ law.title }}</h3>
             <p class="law-desc">{{ law.content || '暂无简介' }}</p>
+            <div v-if="law.matchArticles && law.matchArticles.length" class="hit-block">
+              <div v-for="(m, i) in law.matchArticles" :key="'m' + i" class="hit-item">
+                <span class="hit-no">{{ m.articleNo }}</span>
+                <span class="hit-text">{{ snippet(m.content) }}</span>
+              </div>
+            </div>
             <div class="law-meta">
               <span>{{ law.issuingAuthority || '—' }}</span>
               <span>{{ law.publishDate || '—' }}</span>
@@ -102,7 +108,7 @@
         </div>
 
         <div class="article-list">
-          <div v-for="a in filteredArticles" :id="'art-' + a.id" :key="a.id" class="article-item">
+          <div v-for="a in filteredArticles" :id="'art-' + a.id" :key="a.id" :class="highlightClass(a)">
             <div class="article-no">{{ a.articleNo }}</div>
             <div class="article-body">{{ a.content }}</div>
           </div>
@@ -113,7 +119,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, nextTick } from 'vue'
 import { ElMessage } from 'element-plus'
 import { regulationApi } from '@/api'
 
@@ -185,9 +191,9 @@ async function load() {
       page: page.value,
       size: size.value,
     })
-    list.value = (data.list || []).map(d => ({ ...d, articleCount: d.articleCount || 0 }))
+    // 后端已一次返回 articleCount 与命中条文片段，无需逐卡请求
+    list.value = (data.list || []).map(d => ({ ...d, articleCount: d.articleCount || d.articles?.length || 0, matchArticles: d.matchArticles || [] }))
     total.value = data.total || 0
-    list.value.forEach(fetchArticleCount)
   } catch {
     ElMessage.error('加载法规失败，请稍后重试')
   } finally {
@@ -195,13 +201,12 @@ async function load() {
   }
 }
 
-async function fetchArticleCount(law) {
-  try {
-    const arts = await regulationApi.articles(law.id)
-    law.articleCount = (arts || []).length
-  } catch {
-    law.articleCount = 0
-  }
+/** 命中条文片段：截取到关键词附近 */
+function snippet(text) {
+  if (!text) return ''
+  const t = text.replace(/\s+/g, ' ').trim()
+  if (t.length <= 60) return t
+  return t.slice(0, 60) + '…'
 }
 
 // ---------- 详情 ----------
@@ -209,6 +214,7 @@ const detailOpen = ref(false)
 const detail = ref(null)
 const allArticles = ref([])
 const articleKeyword = ref('')
+const highlightedId = ref(null)
 const detailLoading = ref(false)
 const filteredArticles = computed(() => {
   const k = articleKeyword.value.trim()
@@ -232,12 +238,28 @@ async function openDetail(law) {
     allArticles.value = []
   } finally {
     detailLoading.value = false
+    // 有检索关键词时，定位到命中的第一条并高亮
+    const k = keyword.value.trim()
+    if (k && allArticles.value.length) {
+      const idx = allArticles.value.findIndex(a => (a.content || '').includes(k))
+      if (idx >= 0) {
+        scrollToArticle(allArticles.value[idx].id)
+        highlightedId.value = allArticles.value[idx].id
+      }
+    }
   }
 }
 
+function highlightClass(a) {
+  return a.id === highlightedId.value ? 'article-item highlight' : 'article-item'
+}
+
 function scrollToArticle(id) {
-  const el = document.getElementById('art-' + id)
-  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  highlightedId.value = id
+  nextTick(() => {
+    const el = document.getElementById('art-' + id)
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  })
 }
 
 onMounted(() => {
@@ -277,6 +299,11 @@ onMounted(() => {
 .t-guizhang { background: #fdf1dd; color: #b45309; }
 .law-title { font-size: 16px; margin: 0 0 8px; color: #1a3a8f; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 .law-desc { font-size: 13px; color: #888; margin: 0 0 14px; line-height: 1.6; height: 42px; overflow: hidden; }
+.hit-block { background: #fff8e9; border: 1px solid #f3dfae; border-radius: 8px; padding: 8px 10px; margin-bottom: 12px; }
+.hit-item { display: flex; gap: 8px; font-size: 12.5px; color: #7a5c1e; line-height: 1.6; }
+.hit-item + .hit-item { margin-top: 6px; }
+.hit-no { flex: none; font-weight: 700; color: #b45309; }
+.hit-text { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .law-meta { margin-top: auto; display: flex; justify-content: space-between; color: #999; font-size: 12px; border-top: 1px dashed #eef0f4; padding-top: 10px; }
 .law-articles { color: #1a56db; font-weight: 600; }
 
@@ -290,6 +317,8 @@ onMounted(() => {
 .jump-chip:hover { background: #1a56db; color: #fff; }
 .article-list { max-height: 48vh; overflow-y: auto; border-top: 1px solid #eee; }
 .article-item { display: flex; gap: 14px; padding: 12px 2px; border-bottom: 1px solid #f0f0f0; }
+.article-item.highlight { background: #fff8e9; border-radius: 8px; padding: 12px 8px; box-shadow: inset 3px 0 0 #f5a623; }
+.article-item.highlight .article-body { color: #4a3a10; }
 .article-no { flex: none; font-weight: 700; color: #1a56db; width: 90px; }
 .article-body { line-height: 1.8; color: #333; white-space: pre-wrap; }
 

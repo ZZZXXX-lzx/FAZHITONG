@@ -1,6 +1,7 @@
 package com.fazhitong.casemgt.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.fazhitong.casemgt.entity.Regulation;
 import com.fazhitong.casemgt.entity.RegulationArticle;
@@ -17,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -26,38 +28,132 @@ public class RegulationService {
     private final RegulationArticleMapper articleMapper;
 
     /**
-     * 法规检索：命中标题/关键词/内容摘要，或命中任意条文的正文。
+     * 法规检索：多关键词（空格分隔）AND 召回——
+     * 命中：标题/关键词/内容摘要，或任意条文的正文。
+     * 返回时填充该法规的条文总数（articleCount）与命中的条文片段（matchArticles，最多3条）。
      */
     public PageResult<Regulation> search(String keyword, String lawType, PageParam pageParam) {
-        boolean hasKeyword = keyword != null && !keyword.isBlank();
+        List<String> terms = splitTerms(keyword);
 
-        final Set<Long> articleRegulationIds = new HashSet<>();
-        if (hasKeyword) {
-            articleMapper.selectList(
-                            new LambdaQueryWrapper<RegulationArticle>()
-                                    .like(RegulationArticle::getContent, keyword)
-                                    .select(RegulationArticle::getRegulationId))
-                    .forEach(a -> {
-                        if (a.getRegulationId() != null) {
-                            articleRegulationIds.add(a.getRegulationId());
-                        }
-                    });
+        // 1) 逐关键词求命中法规 id，多关键词取交集（AND）
+        Set<Long> hitIds = null;
+        for (String term : terms) {
+            Set<Long> forTerm = matchRegulationIds(term);
+            hitIds = (hitIds == null) ? forTerm : intersect(hitIds, forTerm);
         }
 
-        LambdaQueryWrapper<Regulation> wrapper = new LambdaQueryWrapper<>();
-        if (hasKeyword) {
-            wrapper.and(w -> w.like(Regulation::getTitle, keyword)
-                    .or().like(Regulation::getKeywords, keyword)
-                    .or().like(Regulation::getContent, keyword)
-                    .or(!articleRegulationIds.isEmpty(), w2 -> w2.in(Regulation::getId, articleRegulationIds)));
+        // 2) 分页查询
+        QueryWrapper<Regulation> qw = new QueryWrapper<>();
+        if (hitIds != null) {
+            if (hitIds.isEmpty()) {
+                return PageResult.of(Collections.emptyList(), 0L, pageParam.getPage(), pageParam.getSize());
+            }
+            qw.in("id", hitIds);
         }
         if (lawType != null && !lawType.isBlank()) {
-            wrapper.eq(Regulation::getLawType, lawType);
+            qw.eq("law_type", lawType);
         }
-        wrapper.orderByDesc(Regulation::getPublishDate).orderByDesc(Regulation::getId);
+        qw.orderByDesc("publish_date").orderByDesc("id");
+        long total = regulationMapper.selectCount(qw);
         Page<Regulation> page = regulationMapper.selectPage(
-                new Page<>(pageParam.getPage(), pageParam.getSize()), wrapper);
-        return PageResult.of(page.getRecords(), page.getTotal(), (int) page.getCurrent(), (int) page.getSize());
+                new Page<>(pageParam.getPage(), pageParam.getSize()), qw);
+        List<Regulation> records = page.getRecords();
+
+        if (!records.isEmpty()) {
+            List<Long> ids = records.stream().map(Regulation::getId).collect(Collectors.toList());
+            Map<Long, Long> countMap = new HashMap<>();
+            // 用 selectMaps 取聚合
+            for (Map<String, Object> row : articleMapper.selectMaps(new QueryWrapper<RegulationArticle>()
+                    .select("regulation_id", "count(*) as cnt")
+                    .in("regulation_id", ids)
+                    .groupBy("regulation_id"))) {
+                Object rid = row.get("regulation_id");
+                Object c = row.get("cnt");
+                if (rid != null) {
+                    countMap.put(((Number) rid).longValue(), c == null ? 0L : ((Number) c).longValue());
+                }
+            }
+            for (Regulation r : records) {
+                r.setArticleCount(countMap.getOrDefault(r.getId(), 0L));
+            }
+            // 命中条文片段
+            if (!terms.isEmpty()) {
+                Map<Long, List<RegulationArticle>> hits = matchArticles(ids, terms);
+                for (Regulation r : records) {
+                    r.setMatchArticles(hits.getOrDefault(r.getId(), Collections.emptyList()));
+                }
+            }
+        }
+
+        return PageResult.of(records, total, (int) page.getCurrent(), (int) page.getSize());
+    }
+
+    /** 空白分词 */
+    private List<String> splitTerms(String keyword) {
+        if (keyword == null || keyword.isBlank()) {
+            return Collections.emptyList();
+        }
+        return Arrays.stream(keyword.trim().split("[\\s,，、;；]+"))
+                .filter(t -> !t.isBlank())
+                .map(this::escapeLike)
+                .collect(Collectors.toList());
+    }
+
+    /** 转义 LIKE 通配符 */
+    private String escapeLike(String s) {
+        return s.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_");
+    }
+
+    /** 单个关键词命中的法规 id：标题/关键词/摘要，或任意条文正文 */
+    private Set<Long> matchRegulationIds(String term) {
+        Set<Long> ids = new HashSet<>();
+        for (Regulation r : regulationMapper.selectList(new LambdaQueryWrapper<Regulation>()
+                .select(Regulation::getId)
+                .like(Regulation::getTitle, term)
+                .or().like(Regulation::getKeywords, term)
+                .or().like(Regulation::getContent, term))) {
+            ids.add(r.getId());
+        }
+        for (RegulationArticle a : articleMapper.selectList(new LambdaQueryWrapper<RegulationArticle>()
+                .select(RegulationArticle::getRegulationId)
+                .like(RegulationArticle::getContent, term))) {
+            if (a.getRegulationId() != null) {
+                ids.add(a.getRegulationId());
+            }
+        }
+        return ids;
+    }
+
+    /** 某法规命中的条文片段（命中任一关键词，最多3条） */
+    private Map<Long, List<RegulationArticle>> matchArticles(List<Long> regulationIds, List<String> terms) {
+        Map<Long, List<RegulationArticle>> result = new HashMap<>();
+        LambdaQueryWrapper<RegulationArticle> aw = new LambdaQueryWrapper<>();
+        aw.in(RegulationArticle::getRegulationId, regulationIds);
+        aw.and(w -> {
+            boolean first = true;
+            for (String t : terms) {
+                if (first) {
+                    w.like(RegulationArticle::getContent, t);
+                    first = false;
+                } else {
+                    w.or().like(RegulationArticle::getContent, t);
+                }
+            }
+        });
+        // 只取号与正文，浅列；按法规分组后截取前3
+        for (RegulationArticle a : articleMapper.selectList(aw
+                .select(RegulationArticle::getRegulationId, RegulationArticle::getArticleNo, RegulationArticle::getContent)
+                .orderByAsc(RegulationArticle::getId))) {
+            result.computeIfAbsent(a.getRegulationId(), k -> new ArrayList<>()).add(a);
+        }
+        result.replaceAll((k, v) -> v.size() > 3 ? v.subList(0, 3) : v);
+        return result;
+    }
+
+    private Set<Long> intersect(Set<Long> a, Set<Long> b) {
+        Set<Long> out = new HashSet<>(a);
+        out.retainAll(b);
+        return out;
     }
 
     public Regulation getById(Long id) {
