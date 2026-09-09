@@ -55,7 +55,7 @@
             <div v-if="law.matchArticles && law.matchArticles.length" class="hit-block">
               <div v-for="(m, i) in law.matchArticles" :key="'m' + i" class="hit-item">
                 <span class="hit-no">{{ m.articleNo }}</span>
-                <span class="hit-text">{{ snippet(m.content) }}</span>
+                <span class="hit-text" v-html="snippetMark(m.content)"></span>
               </div>
             </div>
             <div class="law-meta">
@@ -110,7 +110,7 @@
         <div class="article-list">
           <div v-for="a in filteredArticles" :id="'art-' + a.id" :key="a.id" :class="highlightClass(a)">
             <div class="article-no">{{ a.articleNo }}</div>
-            <div class="article-body">{{ a.content }}</div>
+            <div class="article-body" v-html="highlightText(a.content)"></div>
           </div>
         </div>
       </template>
@@ -140,6 +140,11 @@ const total = ref(0)
 const page = ref(1)
 const size = ref(9)
 const loading = ref(false)
+
+/** 当前检索关键词集合（空格/顿号/逗号分隔），用于高亮与片段截取 */
+const activeTerms = computed(() =>
+  (keyword.value.trim() || '').split(/[\s,，、;；]+/).filter(Boolean)
+)
 
 const stats = ref([
   { label: '法律', count: 0 },
@@ -201,12 +206,44 @@ async function load() {
   }
 }
 
-/** 命中条文片段：截取到关键词附近 */
-function snippet(text) {
-  if (!text) return ''
-  const t = text.replace(/\s+/g, ' ').trim()
-  if (t.length <= 60) return t
-  return t.slice(0, 60) + '…'
+/** 命中条文片段：按首个关键词截取上下文窗口，两端省略 */
+function snippetMark(content) {
+  if (!content) return ''
+  const t = content.replace(/\s+/g, ' ').trim()
+  const term = activeTerms.value[0]
+  if (term) {
+    const idx = t.indexOf(term)
+    if (idx >= 0) {
+      const before = Math.max(0, idx - 24)
+      const after = Math.min(t.length, idx + term.length + 44)
+      let slice = t.slice(before, after)
+      let html = (before > 0 ? '…' : '') + escapeHtml(slice) + (after < t.length ? '…' : '')
+      return markTerms(html, escapeHtml(term))
+    }
+  }
+  return escapeHtml(t.slice(0, 60)) + (t.length > 60 ? '…' : '')
+}
+
+function escapeHtml(s) {
+  if (!s) return ''
+  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;')
+}
+
+/** 将已转义的 HTML 中出现的关键词包上 <mark> */
+function markTerms(escapedHtml, ...escTerms) {
+  let h = escapedHtml
+  for (const term of escTerms) {
+    if (!term) continue
+    h = h.split(term).join('<mark class="kw">' + term + '</mark>')
+  }
+  return h
+}
+
+/** 条文正文高亮：转义后逐词包 <mark> */
+function highlightText(content) {
+  if (!content) return ''
+  const h = escapeHtml(content)
+  return markTerms(h, ...activeTerms.value.map(t => escapeHtml(t)))
 }
 
 // ---------- 详情 ----------
@@ -304,6 +341,7 @@ onMounted(() => {
 .hit-item + .hit-item { margin-top: 6px; }
 .hit-no { flex: none; font-weight: 700; color: #b45309; }
 .hit-text { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.hit-text :deep(mark.kw), .article-body :deep(mark.kw) { background: #ffe08a; color: #c2410c; padding: 0 1px; border-radius: 2px; font-weight: 600; }
 .law-meta { margin-top: auto; display: flex; justify-content: space-between; color: #999; font-size: 12px; border-top: 1px dashed #eef0f4; padding-top: 10px; }
 .law-articles { color: #1a56db; font-weight: 600; }
 
