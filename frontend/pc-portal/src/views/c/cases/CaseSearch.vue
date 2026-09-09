@@ -48,38 +48,54 @@
       </el-table-column>
       <el-table-column label="案由" width="160">
         <template #default="{ row }">
-          <span v-html="highlightText(row.causeName)"></span>
+          <span v-html="highlightTerms(row.causeName)"></span>
         </template>
       </el-table-column>
       <el-table-column prop="courtName" label="法院" width="200" />
       <el-table-column prop="caseYear" label="年份" width="80" />
-      <el-table-column label="摘要" width="300">
+      <el-table-column label="命中片段" min-width="300">
         <template #default="{ row }">
-          <span v-html="highlightText(row.abstractText)"></span>
+          <span class="snippet" v-html="snippet(row)"></span>
         </template>
       </el-table-column>
-      <el-table-column prop="judgmentResult" label="判决结果" width="120" />
+      <el-table-column label="判决结果" width="120">
+        <template #default="{ row }">
+          <span v-html="highlightTerms(row.judgmentResult)"></span>
+        </template>
+      </el-table-column>
     </el-table>
     <el-pagination v-if="total > 0" background layout="prev, pager, next" :total="total" :page-size="size" @current-change="onPageChange" style="margin-top:20px;text-align:center" />
     <el-dialog v-model="detailVisible" title="案例详情" width="800px">
       <template v-if="currentCase">
-        <h3 v-html="highlightText(currentCase.causeName)"></h3>
+        <h3 v-html="highlightTerms(currentCase.causeName)"></h3>
         <p><strong>法院：</strong>{{ currentCase.courtName }} <strong>年份：</strong>{{ currentCase.caseYear }}</p>
-        <p><strong>关键词：</strong>{{ currentCase.keywords }}</p>
+        <p><strong>关键词：</strong><span v-html="highlightTerms(currentCase.keywords)"></span></p>
         <p><strong>匹配度：</strong><el-progress :percentage="matchPercent(currentCase.score)" :stroke-width="16" :format="() => matchPercent(currentCase.score) + '%'" style="display:inline-flex;width:200px;vertical-align:middle;margin-left:8px" /></p>
         <el-divider />
         <h4>摘要</h4>
-        <p v-html="highlightText(currentCase.abstractText)"></p>
+        <p v-html="highlightTerms(currentCase.abstractText)"></p>
         <el-divider />
         <h4>争议焦点</h4>
-        <p v-html="highlightText(currentCase.focusPoints)"></p>
+        <p v-html="highlightTerms(currentCase.focusPoints)"></p>
         <el-divider />
         <h4>判决依据</h4>
-        <p v-if="currentCase.judgmentBasis" v-html="highlightText(currentCase.judgmentBasis)"></p>
+        <p v-if="currentCase.judgmentBasis" v-html="highlightTerms(currentCase.judgmentBasis)"></p>
         <p v-else style="color:#999">暂无判决依据提炼</p>
+        <div v-if="refLoading" class="ref-tip">正在解析关联法条…</div>
+        <div v-else-if="lawRefs.length" class="ref-block">
+          <div class="ref-head">关联法条（可点击跳转法规库查看全文）</div>
+          <div v-for="(r, i) in lawRefs" :key="i" class="ref-item">
+            <button class="ref-no" @click="openRef(r)">{{ r.articleNo }}</button>
+            <div class="ref-main">
+              <div class="ref-law">{{ r.lawTitle }}</div>
+              <div v-if="r.matched" class="ref-content" :title="r.content">{{ r.content }}</div>
+              <el-tag v-else size="small" type="info">该法规尚未收录</el-tag>
+            </div>
+          </div>
+        </div>
         <el-divider />
         <h4>判决结果</h4>
-        <p v-html="highlightText(currentCase.judgmentResult)"></p>
+        <p v-html="highlightTerms(currentCase.judgmentResult)"></p>
       </template>
     </el-dialog>
   </div>
@@ -87,8 +103,10 @@
 
 <script setup>
 import { ref, computed } from 'vue'
-import { caseApi } from '@/api'
+import { useRouter } from 'vue-router'
+import { caseApi, regulationApi } from '@/api'
 
+const router = useRouter()
 const keyword = ref('')
 const causeName = ref('')
 const courtName = ref('')
@@ -101,12 +119,71 @@ const page = ref(1)
 const size = ref(20)
 const detailVisible = ref(false)
 const currentCase = ref(null)
+const refLoading = ref(false)
+const lawRefs = ref([])
 
 const kw = computed(() => keyword.value?.trim())
+
+const terms = computed(() => {
+  const t = keyword.value?.trim()
+  if (!t) return []
+  return t.split(/[\s,，、;；]+/).filter(x => !!x)
+})
+
+function escapeHtmlText(s) {
+  if (s == null) return ''
+  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;')
+}
+
+/** 将所有关键词（空格分隔）逐词高亮，先转义防 XSS */
+function highlightTerms(text) {
+  if (text == null || !text) return ''
+  let html = escapeHtmlText(text)
+  for (const term of terms.value) {
+    const esc = escapeHtmlText(term)
+    if (!esc) continue
+    html = html.split(esc).join('<span class="highlight">' + esc + '</span>')
+  }
+  return html
+}
+
+/** 命中片段：从首个命中词处截取上下文窗口，两端省略 */
+function snippet(row) {
+  if (!row) return ''
+  const candidates = [row.focusPoints, row.abstractText, row.fullText, row.judgmentResult].filter(Boolean)
+  for (const raw of candidates) {
+    const t = String(raw).replace(/\s+/g, ' ').trim()
+    if (!t) continue
+    if (!terms.value.length) {
+      return escapeHtmlText(t.slice(0, 84)) + (t.length > 84 ? '…' : '')
+    }
+    let best = -1
+    let bestLen = 0
+    const lower = t.toLowerCase()
+    for (const term of terms.value) {
+      if (!term) continue
+      const idx = lower.indexOf(term.toLowerCase())
+      if (idx >= 0 && (best < 0 || idx < best)) { best = idx; bestLen = term.length }
+    }
+    if (best >= 0) {
+      const before = Math.max(0, best - 20)
+      const after = Math.min(t.length, best + bestLen + 52)
+      let html = (before > 0 ? '…' : '') + escapeHtmlText(t.slice(before, after)) + (after < t.length ? '…' : '')
+      for (const term of terms.value) {
+        const esc = escapeHtmlText(term)
+        if (!esc) continue
+        html = html.split(esc).join('<span class="highlight">' + esc + '</span>')
+      }
+      return html
+    }
+  }
+  return ''
+}
 
 const examples = [
   { label: '买卖合同纠纷', keyword: '买卖合同' },
   { label: '交通事故赔偿', keyword: '交通事故' },
+  { label: '离婚 财产分割', keyword: '离婚 财产分割' },
   { label: '租赁合同', keyword: '租赁合同' },
   { label: '劳动合同争议', keyword: '劳动合同' },
   { label: '北京市法院案例', keyword: '', courtName: '北京' },
@@ -148,25 +225,35 @@ async function showDetail(row) {
   try {
     currentCase.value = await caseApi.getById(row.id)
     detailVisible.value = true
+    resolveRefs(currentCase.value.judgmentBasis)
   } catch {
     // ignore
   }
+}
+
+async function resolveRefs(quote) {
+  lawRefs.value = []
+  if (!quote) { refLoading.value = false; return }
+  refLoading.value = true
+  try {
+    const data = await regulationApi.resolveRefs(quote)
+    lawRefs.value = data || []
+  } catch {
+    lawRefs.value = []
+  } finally {
+    refLoading.value = false
+  }
+}
+
+function openRef(r) {
+  if (!r.regulationId) return
+  router.push({ path: '/regulations', query: { law: r.regulationId, article: r.articleNo } })
 }
 
 function matchPercent(score) {
   if (!score || score <= 0) return 0
   const max = Math.max(...cases.value.map(c => c.score || 0), 1)
   return Math.min(Math.round((score / max) * 100), 100)
-}
-
-function highlightText(text) {
-  if (!kw.value || !text) return text || ''
-  const regex = new RegExp('(' + escapeRegex(kw.value) + ')', 'gi')
-  return text.replace(regex, '<span class="highlight">$1</span>')
-}
-
-function escapeRegex(str) {
-  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 }
 </script>
 
@@ -181,4 +268,15 @@ function escapeRegex(str) {
 .example-tag { cursor: pointer; }
 .example-tag:hover { opacity: .8; }
 :deep(.highlight) { color: #e74c3c; font-weight: 700; background: #fff3cd; padding: 0 2px; border-radius: 2px; }
+.snippet { font-size: 13px; color: #444; line-height: 1.6; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.ref-tip { color: #999; font-size: 13px; padding: 6px 0; }
+.ref-block { background: #f7f9ff; border: 1px solid #dfe7fb; border-radius: 10px; padding: 12px 14px; margin-top: 6px; }
+.ref-head { font-size: 12px; color: #1a56db; font-weight: 600; margin-bottom: 10px; }
+.ref-item { display: flex; gap: 10px; align-items: flex-start; padding: 8px 0; border-top: 1px dashed #e8edfb; }
+.ref-item:first-of-type { border-top: none; padding-top: 0; }
+.ref-no { flex: none; font-size: 13px; font-weight: 700; color: #1a56db; background: #fff; border: 1px solid #1a56db; border-radius: 6px; padding: 4px 8px; cursor: pointer; min-width: 88px; text-align: center; transition: all .2s; }
+.ref-no:hover { background: #1a56db; color: #fff; }
+.ref-main { min-width: 0; }
+.ref-law { font-size: 12px; color: #666; margin-bottom: 4px; }
+.ref-content { font-size: 13px; color: #333; line-height: 1.7; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
 </style>

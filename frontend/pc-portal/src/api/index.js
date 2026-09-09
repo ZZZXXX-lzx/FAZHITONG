@@ -90,6 +90,7 @@ export const regulationApi = {
   getById: (id) => request.get(`/case/regulation/${id}`),
   getDetail: (id) => request.get(`/case/regulation/${id}/detail`),
   articles: (id) => request.get(`/case/regulation/${id}/articles`),
+  resolveRefs: (quote) => request.get('/case/regulation/resolve', { params: { quote } }),
 }
 
 export const paymentApi = {

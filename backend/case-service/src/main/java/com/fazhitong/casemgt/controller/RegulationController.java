@@ -46,6 +46,11 @@ public class RegulationController {
         return ApiResult.success(regulationService.listArticles(id));
     }
 
+    @GetMapping("/resolve")
+    public ApiResult<List<java.util.Map<String, Object>>> resolveRefs(@RequestParam String quote) {
+        return ApiResult.success(regulationService.resolveRefs(quote));
+    }
+
     // ---------- 管理端 CRUD ----------
 
     @PostMapping

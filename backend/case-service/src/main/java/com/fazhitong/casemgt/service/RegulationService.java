@@ -176,6 +176,122 @@ public class RegulationService {
                         .orderByAsc(RegulationArticle::getId));
     }
 
+    // ---------- 法条引用解析（案例判决依据 → 法规库条文联动） ----------
+
+    private static final Pattern LAW_REF = Pattern.compile("《([^》]+)》");
+    private static final Pattern ART_REF =
+            Pattern.compile("第[0-9〇零一二三四五六七八九十百千]{1,12}条(?:之[一二三四五六七八九十]+)?");
+    private static final Pattern ART_TAIL = Pattern.compile("第[一二三四五六七八九十]+(?:款|项|目)$");
+
+    /**
+     * 解析一段"判决依据/法条引用"文本，返回可跳转的条文列表。
+     * 识别格式如《中华人民共和国民法典》第五百七十七条、第五百八十五条……
+     * 每条引用解析出法规标题、法规 id、条文号、条文正文（未收录则 matched=false）。
+     */
+    public List<Map<String, Object>> resolveRefs(String quote) {
+        List<Map<String, Object>> out = new ArrayList<>();
+        if (quote == null || quote.isBlank()) {
+            return out;
+        }
+        Matcher lm = LAW_REF.matcher(quote);
+        String prevLaw = null;
+        int prevEnd = 0;
+        while (lm.find()) {
+            if (prevLaw != null) {
+                resolveSegment(out, prevLaw, quote.substring(prevEnd, lm.start()));
+            }
+            prevLaw = lm.group(1);
+            prevEnd = lm.end();
+        }
+        if (prevLaw != null) {
+            resolveSegment(out, prevLaw, quote.substring(prevEnd));
+        }
+        // 保留原文中可能独立出现的引用：无书名号但形如"民法典第xxx条"
+        if (out.isEmpty()) {
+            resolveWithoutBook(out, quote);
+        }
+        return out.size() > 40 ? out.subList(0, 40) : out;
+    }
+
+    private void resolveSegment(List<Map<String, Object>> out, String lawName, String seg) {
+        if (seg == null) return;
+        Regulation reg = regulationMapper.selectOne(
+                new LambdaQueryWrapper<Regulation>().eq(Regulation::getTitle, lawName)
+                        .last("limit 1"));
+        if (reg == null) {
+            // 标题不完全一致时退化为 LIKE 兜底
+            reg = regulationMapper.selectOne(
+                    new LambdaQueryWrapper<Regulation>().like(Regulation::getTitle, lawName)
+                            .last("limit 1"));
+        }
+        Matcher am = ART_REF.matcher(seg);
+        Set<String> seen = new LinkedHashSet<>();
+        while (am.find()) {
+            String no = am.group();
+            if (!seen.add(no)) continue;
+            addRef(out, lawName, reg, no);
+        }
+    }
+
+    private void addRef(List<Map<String, Object>> out, String lawName, Regulation reg, String no) {
+        String clean = ART_TAIL.matcher(no).replaceFirst("");
+        Map<String, Object> item = new LinkedHashMap<>();
+        item.put("lawTitle", lawName);
+        item.put("articleNo", no);
+        if (reg != null) {
+            item.put("regulationId", reg.getId());
+            RegulationArticle art = articleMapper.selectOne(
+                    new LambdaQueryWrapper<RegulationArticle>()
+                            .eq(RegulationArticle::getRegulationId, reg.getId())
+                            .eq(RegulationArticle::getArticleNo, clean)
+                            .last("limit 1"));
+            if (art != null) {
+                item.put("matched", true);
+                item.put("content", art.getContent());
+            } else {
+                item.put("matched", false);
+            }
+        } else {
+            item.put("matched", false);
+        }
+        out.add(item);
+    }
+
+    /** 无书名号引用（形如"民法典第三百四十条"）：尝试按"法律简称+第X条"解析 */
+    private void resolveWithoutBook(List<Map<String, Object>> out, String quote) {
+        String[] lines = quote.split("[；;，,、\n]+");
+        for (String seg : lines) {
+            String trimmed = seg.trim();
+            if (trimmed.isEmpty()) continue;
+            // 找"第X条"前的名称片段
+            java.util.regex.Matcher am0 = ART_REF.matcher(trimmed);
+            if (!am0.find()) continue;
+            String namePart = trimmed.substring(0, am0.start()).trim();
+            if (namePart.length() < 2 || namePart.length() > 40) continue;
+            namePart = namePart.replaceAll("^依据|根据|依照|按照", "").trim();
+            Regulation reg = regulationMapper.selectOne(
+                    new LambdaQueryWrapper<Regulation>()
+                            .like(Regulation::getTitle, namePart)
+                            .or().like(Regulation::getKeywords, namePart)
+                            .last("limit 1"));
+            if (reg == null) continue;
+            for (String no : extractArticleNos(trimmed, namePart.length())) {
+                addRef(out, reg.getTitle(), reg, no);
+            }
+        }
+    }
+
+    private List<String> extractArticleNos(String seg, int from) {
+        List<String> nos = new ArrayList<>();
+        Matcher m = ART_REF.matcher(seg.substring(from));
+        Set<String> seen = new LinkedHashSet<>();
+        while (m.find()) {
+            String no = m.group();
+            if (seen.add(no)) nos.add(no);
+        }
+        return nos;
+    }
+
     public Regulation create(Regulation regulation) {
         // 只保存法规主表信息，新建后由专门接口追加条文
         regulation.setId(null);

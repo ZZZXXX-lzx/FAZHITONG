@@ -10,8 +10,10 @@ import com.fazhitong.casemgt.mapper.CaseGovernmentMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -31,13 +33,16 @@ public class CaseService {
                                               PageParam pageParam) {
         LambdaQueryWrapper<CaseGovernment> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(CaseGovernment::getStatus, 1);
-        if (keyword != null && !keyword.isBlank()) {
+        // 多关键词（空格分隔）AND 召回：每个关键词需命中任一检索字段，关键词之间取交集
+        List<String> terms = splitTerms(keyword);
+        for (String term : terms) {
             wrapper.and(w -> w
-                    .like(CaseGovernment::getCauseName, keyword)
-                    .or().like(CaseGovernment::getKeywords, keyword)
-                    .or().like(CaseGovernment::getAbstractText, keyword)
-                    .or().like(CaseGovernment::getFocusPoints, keyword)
-                    .or().like(CaseGovernment::getFullText, keyword));
+                    .like(CaseGovernment::getCauseName, term)
+                    .or().like(CaseGovernment::getKeywords, term)
+                    .or().like(CaseGovernment::getAbstractText, term)
+                    .or().like(CaseGovernment::getFocusPoints, term)
+                    .or().like(CaseGovernment::getFullText, term)
+                    .or().like(CaseGovernment::getJudgmentResult, term));
         }
         if (causeName != null && !causeName.isBlank()) wrapper.eq(CaseGovernment::getCauseName, causeName);
         if (courtName != null && !courtName.isBlank()) wrapper.like(CaseGovernment::getCourtName, courtName);
@@ -62,18 +67,19 @@ public class CaseService {
 
         List<CaseGovernment> records = page.getRecords();
 
-        // Score results on current page for relevance ranking
-        if (keyword != null && !keyword.isBlank()) {
-            String kw = keyword.toLowerCase();
+        // Score results on current page for relevance ranking（多关键词，取各词命中次数之和）
+        if (!terms.isEmpty()) {
             for (CaseGovernment cg : records) {
-                int count = 0;
-                count += countOccurrences(cg.getFullText(), kw);
-                count += countOccurrences(cg.getAbstractText(), kw);
-                count += countOccurrences(cg.getFocusPoints(), kw);
-                count += countOccurrences(cg.getCauseName(), kw);
-                count += countOccurrences(cg.getKeywords(), kw);
-                count += countOccurrences(cg.getJudgmentResult(), kw);
-                cg.setScore((double) count);
+                double count = 0;
+                for (String t : terms) {
+                    count += countOccurrences(cg.getFullText(), t);
+                    count += countOccurrences(cg.getAbstractText(), t);
+                    count += countOccurrences(cg.getFocusPoints(), t);
+                    count += countOccurrences(cg.getCauseName(), t);
+                    count += countOccurrences(cg.getKeywords(), t);
+                    count += countOccurrences(cg.getJudgmentResult(), t);
+                }
+                cg.setScore(count);
             }
             records.sort(Comparator.comparingDouble(
                     (CaseGovernment cg) -> cg.getScore() != null ? cg.getScore() : 0).reversed());
@@ -82,6 +88,16 @@ public class CaseService {
         }
 
         return PageResult.of(records, page.getTotal(), (int) page.getCurrent(), (int) page.getSize());
+    }
+
+    /** 空白分隔多关键词，剔除空白项 */
+    private List<String> splitTerms(String keyword) {
+        if (keyword == null || keyword.isBlank()) {
+            return java.util.Collections.emptyList();
+        }
+        return Arrays.stream(keyword.trim().split("[\\s,，、;；]+"))
+                .filter(t -> !t.isBlank())
+                .collect(Collectors.toList());
     }
 
     public CaseGovernment getById(Long id) {

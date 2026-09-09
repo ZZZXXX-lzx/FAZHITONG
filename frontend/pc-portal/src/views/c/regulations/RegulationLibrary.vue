@@ -120,8 +120,11 @@
 
 <script setup>
 import { ref, computed, onMounted, nextTick } from 'vue'
+import { useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { regulationApi } from '@/api'
+
+const route = useRoute()
 
 const categoryTabs = [
   { label: '全部', value: '' },
@@ -299,9 +302,42 @@ function scrollToArticle(id) {
   })
 }
 
+/** 由案例模块跳转而来：按 id 打开法规详情并定位到指定条文 */
+async function openById(id, articleNo) {
+  keyword.value = ''
+  detailOpen.value = false
+  detail.value = null
+  allArticles.value = []
+  articleKeyword.value = ''
+  detailLoading.value = true
+  try {
+    const data = await regulationApi.getDetail(id)
+    if (data) {
+      detail.value = data
+      allArticles.value = data.articles || []
+      detailOpen.value = true
+      await nextTick()
+      if (articleNo && allArticles.value.length) {
+        const hit = allArticles.value.find(a => (a.articleNo || '').includes(articleNo.replace(/第/g, '').replace(/条$/, '')))
+        const target = hit || allArticles.value[0]
+        highlightedId.value = target.id
+        scrollToArticle(target.id)
+      }
+    }
+  } catch {
+    ElMessage.error('加载关联法规失败')
+  } finally {
+    detailLoading.value = false
+  }
+}
+
 onMounted(() => {
   load()
   fetchCounts()
+  const lawId = Number(route.query.law)
+  if (lawId) {
+    openById(lawId, route.query.article)
+  }
 })
 </script>
 
