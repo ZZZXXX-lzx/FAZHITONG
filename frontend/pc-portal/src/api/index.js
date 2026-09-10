@@ -75,7 +75,9 @@ export const contractApi = {
 export const caseApi = {
   search: (params) => request.get('/case/search', { params }),
   getById: (id) => request.get(`/case/${id}`),
-  litigation: (cause, description) => request.post('/case/litigation/analyze', { cause, description }),
+  stats: () => request.get('/case/stats'),
+  litigation: (cause, description) => request.post('/case/litigation/analyze',
+ { cause, description }),
   dueDiligence: (companyName, focus) => request.post('/case/due-diligence/report', { companyName, focus }),
 }
 

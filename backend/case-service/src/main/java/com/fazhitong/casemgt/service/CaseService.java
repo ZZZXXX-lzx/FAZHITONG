@@ -1,6 +1,7 @@
 package com.fazhitong.casemgt.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.fazhitong.common.ai.AiClient;
 import com.fazhitong.common.dto.PageParam;
@@ -10,9 +11,12 @@ import com.fazhitong.casemgt.mapper.CaseGovernmentMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -98,6 +102,40 @@ public class CaseService {
         return Arrays.stream(keyword.trim().split("[\\s,，、;；]+"))
                 .filter(t -> !t.isBlank())
                 .collect(Collectors.toList());
+    }
+
+    /** 案例分维度聚合统计：总量 + 案由/法院 TOP + 年份分布 */
+    public Map<String, Object> stats() {
+        Map<String, Object> result = new LinkedHashMap<>();
+        result.put("total", caseMapper.selectCount(
+                new LambdaQueryWrapper<CaseGovernment>().eq(CaseGovernment::getStatus, 1)));
+        result.put("causeTop", groupCount("cause_name", 8));
+        result.put("courtTop", groupCount("court_name", 8));
+        result.put("yearDist", groupCount("case_year", 8));
+        return result;
+    }
+
+    /** 对某列做分组计数，返回 [{name, count}]，按数量倒序 */
+    private List<Map<String, Object>> groupCount(String column, int limit) {
+        QueryWrapper<CaseGovernment> qw = new QueryWrapper<CaseGovernment>()
+                .select(column + " as name", "count(*) as cnt")
+                .eq("status", 1)
+                .groupBy(column)
+                .orderByDesc("cnt")
+                .orderByAsc(column)
+                .last("limit " + limit);
+        List<Map<String, Object>> rows = caseMapper.selectMaps(qw);
+        List<Map<String, Object>> out = new ArrayList<>();
+        for (Map<String, Object> r : rows) {
+            Object nm = r.get("name");
+            Object cnt = r.get("cnt");
+            if (nm == null) continue;
+            Map<String, Object> item = new LinkedHashMap<>();
+            item.put("name", nm);
+            item.put("count", cnt == null ? 0L : ((Number) cnt).longValue());
+            out.add(item);
+        }
+        return out;
     }
 
     public CaseGovernment getById(Long id) {

@@ -8,12 +8,19 @@ import com.fazhitong.casemgt.service.CaseService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/case")
 @RequiredArgsConstructor
 public class CaseController {
 
     private final CaseService caseService;
+
+    @GetMapping("/stats")
+    public ApiResult<Map<String, Object>> stats() {
+        return ApiResult.success(caseService.stats());
+    }
 
     @GetMapping("/search")
     public ApiResult<PageResult<CaseGovernment>> search(

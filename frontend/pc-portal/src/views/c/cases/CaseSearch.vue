@@ -2,8 +2,32 @@
   <div class="case-search">
     <div class="page-header">
       <h2>案例检索</h2>
-      <p>千万级裁判文书智能检索，支持多维筛选</p>
+      <p>裁判文书智能检索，支持多维筛选 · 引用法条可溯源</p>
     </div>
+    <section v-loading="statsLoading" class="stats-panel">
+      <div class="stats-total">
+        <div class="stats-num">{{ stats?.total ?? 0 }}</div>
+        <div class="stats-cap">收录参考案例</div>
+      </div>
+      <div class="stats-col">
+        <div class="stats-title">热门案由</div>
+        <div class="stats-chips">
+          <span v-for="c in stats?.causeTop || []" :key="c.name" class="chip" @click="quickSearch(c.name)">{{ c.name }} {{ c.count }}</span>
+        </div>
+      </div>
+      <div class="stats-col">
+        <div class="stats-title">常见受理法院</div>
+        <div class="stats-chips">
+          <span v-for="c in stats?.courtTop || []" :key="c.name" class="chip" @click="quickCourt(c.name)">{{ c.name }} {{ c.count }}</span>
+        </div>
+      </div>
+      <div class="stats-col">
+        <div class="stats-title">年份分布</div>
+        <div class="stats-chips">
+          <span v-for="c in stats?.yearDist || []" :key="c.name" class="chip chip-year">{{ c.name }} {{ c.count }}</span>
+        </div>
+      </div>
+    </section>
     <el-card class="search-box">
       <el-form :inline="true">
         <el-form-item>
@@ -102,11 +126,13 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { caseApi, regulationApi } from '@/api'
 
 const router = useRouter()
+const stats = ref(null)
+const statsLoading = ref(false)
 const keyword = ref('')
 const causeName = ref('')
 const courtName = ref('')
@@ -221,6 +247,34 @@ async function search() {
 
 function onPageChange(p) { page.value = p; search() }
 
+async function loadStats() {
+  statsLoading.value = true
+  try {
+    stats.value = await caseApi.stats()
+  } catch {
+    stats.value = null
+  } finally {
+    statsLoading.value = false
+  }
+}
+
+function quickSearch(name) {
+  keyword.value = name
+  causeName.value = ''
+  courtName.value = ''
+  caseYear.value = ''
+  search()
+}
+
+function quickCourt(name) {
+  courtName.value = name
+  keyword.value = ''
+  caseYear.value = ''
+  search()
+}
+
+onMounted(() => { loadStats() })
+
 async function showDetail(row) {
   try {
     currentCase.value = await caseApi.getById(row.id)
@@ -267,6 +321,17 @@ function matchPercent(score) {
 .example-label { font-size: 13px; color: #999; white-space: nowrap; }
 .example-tag { cursor: pointer; }
 .example-tag:hover { opacity: .8; }
+.stats-panel { background: linear-gradient(135deg, #1a3a8f 0%, #1a56db 100%); border-radius: 14px; padding: 22px 24px; margin-bottom: 18px; color: #fff; display: flex; align-items: flex-start; gap: 28px; flex-wrap: wrap; }
+.stats-total { text-align: center; min-width: 120px; }
+.stats-num { font-size: 40px; font-weight: 800; line-height: 1; }
+.stats-cap { font-size: 13px; opacity: .85; margin-top: 8px; }
+.stats-col { min-width: 0; }
+.stats-title { font-size: 13px; opacity: .9; margin-bottom: 10px; font-weight: 600; }
+.stats-chips { display: flex; flex-wrap: wrap; gap: 8px; max-width: 460px; }
+.chip { font-size: 12px; padding: 4px 10px; background: rgba(255,255,255,.16); border: 1px solid rgba(255,255,255,.3); border-radius: 14px; color: #fff; cursor: pointer; }
+.stats-col .chip:hover { background: #fff; color: #1a56db; }
+.chip-year { cursor: default; }
+@media (max-width: 760px) { .stats-panel { flex-direction: column; gap: 18px; } .stats-chips { max-width: 100%; } }
 :deep(.highlight) { color: #e74c3c; font-weight: 700; background: #fff3cd; padding: 0 2px; border-radius: 2px; }
 .snippet { font-size: 13px; color: #444; line-height: 1.6; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
 .ref-tip { color: #999; font-size: 13px; padding: 6px 0; }
