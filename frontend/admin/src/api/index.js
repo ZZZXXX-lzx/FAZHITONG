@@ -10,6 +10,15 @@ export const userApi = {
   dashboardStats: () => request.get('/user/dashboard/stats'),
 }
 
+export const roleApi = {
+  create: (data) => request.post('/user/role', data),
+  update: (data) => request.put('/user/role', data),
+  delete: (id) => request.delete(`/user/role/${id}`),
+  permissions: () => request.get('/user/role/permissions'),
+  detail: (id) => request.get(`/user/role/${id}`),
+  assign: (id, permissionIds) => request.put(`/user/role/${id}/permissions`, permissionIds),
+}
+
 export const lawyerApi = {
   list: (params) => request.get('/user/lawyer/list', { params }),
   getByUserId: (userId) => request.get(`/user/lawyer/info/${userId}`),

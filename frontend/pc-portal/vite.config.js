@@ -45,6 +45,21 @@ export default defineConfig({
       '@': path.resolve(__dirname, 'src'),
     },
   },
+  build: {
+    chunkSizeWarningLimit: 1000,
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes('node_modules')) {
+            if (id.includes('element-plus') || id.includes('@element-plus')) return 'element-plus'
+            if (id.includes('docx') || id.includes('file-saver') || id.includes('jszip')) return 'docx'
+            if (id.includes('vue') || id.includes('vue-router') || id.includes('pinia')) return 'vue-vendor'
+            return 'vendor'
+          }
+        },
+      },
+    },
+  },
   server: {
     host: '0.0.0.0',
     port: 3000,
