@@ -22,3 +22,60 @@ Initialization Sequence datacenterId:0 workerId:4
                         3.5.5 
 2026-09-14T15:12:05.825+08:00  INFO 13424 --- [case-service] [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8086 (http) with context path ''
 2026-09-14T15:12:05.834+08:00  INFO 13424 --- [case-service] [           main] com.fazhitong.casemgt.CaseApplication    : Started CaseApplication in 8.893 seconds (process running for 9.906)
+2026-09-14T16:01:56.859+08:00  INFO 13424 --- [case-service] [nio-8086-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-09-14T16:01:56.862+08:00  INFO 13424 --- [case-service] [nio-8086-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2026-09-14T16:01:56.883+08:00  INFO 13424 --- [case-service] [nio-8086-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 20 ms
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@1c6565c3] was not registered for synchronization because synchronization is not active
+2026-09-14T16:01:57.089+08:00  INFO 13424 --- [case-service] [nio-8086-exec-1] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-09-14T16:01:57.444+08:00  INFO 13424 --- [case-service] [nio-8086-exec-1] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@58ccab75
+2026-09-14T16:01:57.446+08:00  INFO 13424 --- [case-service] [nio-8086-exec-1] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+JDBC Connection [HikariProxyConnection@130549312 wrapping com.mysql.cj.jdbc.ConnectionImpl@58ccab75] will not be managed by Spring
+==>  Preparing: SELECT COUNT( * ) AS total FROM case_government WHERE (status = ?)
+==> Parameters: 1(Integer)
+<==    Columns: total
+<==        Row: 45
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@1c6565c3]
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@379ad168] was not registered for synchronization because synchronization is not active
+JDBC Connection [HikariProxyConnection@1895521120 wrapping com.mysql.cj.jdbc.ConnectionImpl@58ccab75] will not be managed by Spring
+==>  Preparing: SELECT cause_name as name,count(*) as cnt FROM case_government WHERE (status = ?) GROUP BY cause_name ORDER BY cnt DESC,cause_name ASC limit 8
+==> Parameters: 1(Integer)
+<==    Columns: name, cnt
+<==        Row: 劳动合同纠纷, 3
+<==        Row: 劳动争议纠纷, 2
+<==        Row: 专利权侵权纠纷, 1
+<==        Row: 买卖合同纠纷, 1
+<==        Row: 产品责任纠纷, 1
+<==        Row: 人身损害赔偿纠纷, 1
+<==        Row: 供用电合同纠纷, 1
+<==        Row: 保证合同纠纷, 1
+<==      Total: 8
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@379ad168]
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@47a5468f] was not registered for synchronization because synchronization is not active
+JDBC Connection [HikariProxyConnection@1447185937 wrapping com.mysql.cj.jdbc.ConnectionImpl@58ccab75] will not be managed by Spring
+==>  Preparing: SELECT court_name as name,count(*) as cnt FROM case_government WHERE (status = ?) GROUP BY court_name ORDER BY cnt DESC,court_name ASC limit 8
+==> Parameters: 1(Integer)
+<==    Columns: name, cnt
+<==        Row: 北京市朝阳区人民法院, 3
+<==        Row: 北京市海淀区人民法院, 2
+<==        Row: 深圳市南山区人民法院, 2
+<==        Row: 郑州市金水区人民法院, 2
+<==        Row: 重庆市渝中区人民法院, 2
+<==        Row: 上海市浦东新区人民法院, 1
+<==        Row: 上海市知识产权法院, 1
+<==        Row: 上海市闵行区人民法院, 1
+<==      Total: 8
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@47a5468f]
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@2f029313] was not registered for synchronization because synchronization is not active
+JDBC Connection [HikariProxyConnection@1123957058 wrapping com.mysql.cj.jdbc.ConnectionImpl@58ccab75] will not be managed by Spring
+==>  Preparing: SELECT case_year as name,count(*) as cnt FROM case_government WHERE (status = ?) GROUP BY case_year ORDER BY cnt DESC,case_year ASC limit 8
+==> Parameters: 1(Integer)
+<==    Columns: name, cnt
+<==        Row: 2023, 38
+<==        Row: 2022, 7
+<==      Total: 2
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@2f029313]

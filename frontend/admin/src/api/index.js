@@ -8,6 +8,8 @@ export const userApi = {
   delete: (id) => request.delete(`/user/${id}`),
   roles: () => request.get('/user/roles'),
   dashboardStats: () => request.get('/user/dashboard/stats'),
+  systemConfig: () => request.get('/user/system-config'),
+  saveSystemConfig: (data) => request.put('/user/system-config', data),
 }
 
 export const roleApi = {

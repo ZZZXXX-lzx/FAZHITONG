@@ -73,3 +73,21 @@ JDBC Connection [HikariProxyConnection@1358521984 wrapping com.mysql.cj.jdbc.Con
 <==        Row: 2, 10086, $2a$10$pXI.qmrjkezfZWFiyF1vTeTZsAOueAYic8aoCiN8tMgGcg2mqiUuC, 1, 12345678910, USER, 1, 2026-08-28 14:26:46, 2026-08-28 14:26:46
 <==      Total: 1
 Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@5e3e9337]
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@5ad490e3] was not registered for synchronization because synchronization is not active
+JDBC Connection [HikariProxyConnection@1410557385 wrapping com.mysql.cj.jdbc.ConnectionImpl@502cfb93] will not be managed by Spring
+==>  Preparing: SELECT id,account,password,nickname,phone,user_type,status,create_time,update_time FROM user WHERE (account = ?)
+==> Parameters: admin(String)
+<==    Columns: id, account, password, nickname, phone, user_type, status, create_time, update_time
+<==        Row: 1, admin, $2a$10$bHXcLAjYcwXJt3yjXE9DhOddWnRTUuoPbiUpIfhuVM0lN6UcwvAsS, 系统管理员, null, ADMIN, 1, 2026-08-28 14:11:00, 2026-08-28 14:11:00
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@5ad490e3]
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@2ded930] was not registered for synchronization because synchronization is not active
+JDBC Connection [HikariProxyConnection@202975003 wrapping com.mysql.cj.jdbc.ConnectionImpl@502cfb93] will not be managed by Spring
+==>  Preparing: SELECT id,account,password,nickname,phone,user_type,status,create_time,update_time FROM user WHERE (account = ?)
+==> Parameters: admin(String)
+<==    Columns: id, account, password, nickname, phone, user_type, status, create_time, update_time
+<==        Row: 1, admin, $2a$10$bHXcLAjYcwXJt3yjXE9DhOddWnRTUuoPbiUpIfhuVM0lN6UcwvAsS, 系统管理员, null, ADMIN, 1, 2026-08-28 14:11:00, 2026-08-28 14:11:00
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@2ded930]
