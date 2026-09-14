@@ -48,7 +48,7 @@ import { allServicesFor } from '@/config/services'
 const router = useRouter()
 const userStore = useUserStore()
 
-const services = computed(() => allServicesFor(userStore.userType, userStore.isLoggedIn))
+const services = computed(() => allServicesFor(userStore.userType, userStore.isLoggedIn, userStore.permCodes))
 
 function goService(item) {
   router.push(item.path)

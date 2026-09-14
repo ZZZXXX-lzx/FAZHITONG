@@ -12,6 +12,7 @@ export const userApi = {
   update: (data) => request.put('/user', data),
   delete: (id) => request.delete(`/user/${id}`),
   roles: () => request.get('/user/roles'),
+  perms: () => request.get('/user/role/perms'),
 }
 
 export const documentApi = {

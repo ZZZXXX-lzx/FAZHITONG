@@ -1,0 +1,75 @@
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+ :: Spring Boot ::                (v3.2.0)
+
+2026-09-14T15:11:56.375+08:00  INFO 33412 --- [auth-service] [           main] com.fazhitong.auth.AuthApplication       : Starting AuthApplication v1.0.0 using Java 21.0.12 with PID 33412 (D:\FAZHITONG\backend\auth-service\target\auth-service-1.0.0.jar started by åˆ˜å­è½© in D:\FAZHITONG\backend\auth-service)
+2026-09-14T15:11:56.383+08:00  INFO 33412 --- [auth-service] [           main] com.fazhitong.auth.AuthApplication       : No active profile set, falling back to 1 default profile: "default"
+2026-09-14T15:12:00.333+08:00  INFO 33412 --- [auth-service] [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8081 (http)
+2026-09-14T15:12:00.355+08:00  INFO 33412 --- [auth-service] [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-09-14T15:12:00.356+08:00  INFO 33412 --- [auth-service] [           main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.16]
+2026-09-14T15:12:00.457+08:00  INFO 33412 --- [auth-service] [           main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2026-09-14T15:12:00.459+08:00  INFO 33412 --- [auth-service] [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 3935 ms
+Logging initialized using 'class org.apache.ibatis.logging.stdout.StdOutImpl' adapter.
+Initialization Sequence datacenterId:0 workerId:5
+ _ _   |_  _ _|_. ___ _ |    _ 
+| | |\/|_)(_| | |_\  |_)||_|_\ 
+     /               |         
+                        3.5.5 
+2026-09-14T15:12:03.281+08:00  INFO 33412 --- [auth-service] [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8081 (http) with context path ''
+2026-09-14T15:12:03.295+08:00  INFO 33412 --- [auth-service] [           main] com.fazhitong.auth.AuthApplication       : Started AuthApplication in 7.822 seconds (process running for 8.446)
+2026-09-14T15:12:45.617+08:00  INFO 33412 --- [auth-service] [nio-8081-exec-5] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-09-14T15:12:45.617+08:00  INFO 33412 --- [auth-service] [nio-8081-exec-5] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2026-09-14T15:12:45.618+08:00  INFO 33412 --- [auth-service] [nio-8081-exec-5] o.s.web.servlet.DispatcherServlet        : Completed initialization in 1 ms
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@a3bdc5b] was not registered for synchronization because synchronization is not active
+2026-09-14T15:12:45.783+08:00  INFO 33412 --- [auth-service] [nio-8081-exec-5] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-09-14T15:12:46.171+08:00  INFO 33412 --- [auth-service] [nio-8081-exec-5] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@4b824d3d
+2026-09-14T15:12:46.173+08:00  INFO 33412 --- [auth-service] [nio-8081-exec-5] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+JDBC Connection [HikariProxyConnection@2103403038 wrapping com.mysql.cj.jdbc.ConnectionImpl@4b824d3d] will not be managed by Spring
+==>  Preparing: SELECT id,account,password,nickname,phone,user_type,status,create_time,update_time FROM user WHERE (account = ?)
+==> Parameters: 10086(String)
+<==    Columns: id, account, password, nickname, phone, user_type, status, create_time, update_time
+<==        Row: 2, 10086, $2a$10$pXI.qmrjkezfZWFiyF1vTeTZsAOueAYic8aoCiN8tMgGcg2mqiUuC, 1, 12345678910, USER, 1, 2026-08-28 14:26:46, 2026-08-28 14:26:46
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@a3bdc5b]
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@34573231] was not registered for synchronization because synchronization is not active
+JDBC Connection [HikariProxyConnection@982571723 wrapping com.mysql.cj.jdbc.ConnectionImpl@4b824d3d] will not be managed by Spring
+==>  Preparing: SELECT id,account,password,nickname,phone,user_type,status,create_time,update_time FROM user WHERE (account = ?)
+==> Parameters: 10086(String)
+<==    Columns: id, account, password, nickname, phone, user_type, status, create_time, update_time
+<==        Row: 2, 10086, $2a$10$pXI.qmrjkezfZWFiyF1vTeTZsAOueAYic8aoCiN8tMgGcg2mqiUuC, 1, 12345678910, USER, 1, 2026-08-28 14:26:46, 2026-08-28 14:26:46
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@34573231]
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@687794d3] was not registered for synchronization because synchronization is not active
+JDBC Connection [HikariProxyConnection@1722841005 wrapping com.mysql.cj.jdbc.ConnectionImpl@4b824d3d] will not be managed by Spring
+==>  Preparing: SELECT id,account,password,nickname,phone,user_type,status,create_time,update_time FROM user WHERE (account = ?)
+==> Parameters: admin(String)
+<==    Columns: id, account, password, nickname, phone, user_type, status, create_time, update_time
+<==        Row: 1, admin, $2a$10$bHXcLAjYcwXJt3yjXE9DhOddWnRTUuoPbiUpIfhuVM0lN6UcwvAsS, ÏµÍ³¹ÜÀíÔ±, null, ADMIN, 1, 2026-08-28 14:11:00, 2026-08-28 14:11:00
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@687794d3]
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@121beee8] was not registered for synchronization because synchronization is not active
+JDBC Connection [HikariProxyConnection@484184795 wrapping com.mysql.cj.jdbc.ConnectionImpl@4b824d3d] will not be managed by Spring
+==>  Preparing: SELECT id,account,password,nickname,phone,user_type,status,create_time,update_time FROM user WHERE (account = ?)
+==> Parameters: admin(String)
+<==    Columns: id, account, password, nickname, phone, user_type, status, create_time, update_time
+<==        Row: 1, admin, $2a$10$bHXcLAjYcwXJt3yjXE9DhOddWnRTUuoPbiUpIfhuVM0lN6UcwvAsS, ÏµÍ³¹ÜÀíÔ±, null, ADMIN, 1, 2026-08-28 14:11:00, 2026-08-28 14:11:00
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@121beee8]
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@5e3e9337] was not registered for synchronization because synchronization is not active
+JDBC Connection [HikariProxyConnection@1358521984 wrapping com.mysql.cj.jdbc.ConnectionImpl@4b824d3d] will not be managed by Spring
+==>  Preparing: SELECT id,account,password,nickname,phone,user_type,status,create_time,update_time FROM user WHERE (account = ?)
+==> Parameters: 10086(String)
+<==    Columns: id, account, password, nickname, phone, user_type, status, create_time, update_time
+<==        Row: 2, 10086, $2a$10$pXI.qmrjkezfZWFiyF1vTeTZsAOueAYic8aoCiN8tMgGcg2mqiUuC, 1, 12345678910, USER, 1, 2026-08-28 14:26:46, 2026-08-28 14:26:46
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@5e3e9337]

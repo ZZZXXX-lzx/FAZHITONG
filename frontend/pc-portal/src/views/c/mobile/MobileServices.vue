@@ -31,7 +31,7 @@ import { allServicesFor } from '@/config/services'
 const router = useRouter()
 const userStore = useUserStore()
 
-const services = computed(() => allServicesFor(userStore.userType, userStore.isLoggedIn))
+const services = computed(() => allServicesFor(userStore.userType, userStore.isLoggedIn, userStore.permCodes))
 
 function goService(item) {
   if (item.roles && !userStore.isLoggedIn) {

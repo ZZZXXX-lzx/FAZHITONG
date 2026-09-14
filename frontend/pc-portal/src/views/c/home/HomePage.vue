@@ -74,7 +74,7 @@ import { allServicesFor } from '@/config/services'
 const router = useRouter()
 const userStore = useUserStore()
 
-const features = computed(() => allServicesFor(userStore.userType, userStore.isLoggedIn))
+const features = computed(() => allServicesFor(userStore.userType, userStore.isLoggedIn, userStore.permCodes))
 
 const roleWorkspace = computed(() => {
   const type = userStore.userType

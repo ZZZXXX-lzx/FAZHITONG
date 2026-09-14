@@ -48,4 +48,10 @@ public class RolePermissionController {
         rolePermissionService.assignPermissions(id, permissionIds);
         return ApiResult.success();
     }
+
+    @GetMapping("/perms")
+    public ApiResult<List<String>> perms(
+            @RequestHeader(value = "X-User-Type", required = false) String userType) {
+        return ApiResult.success(rolePermissionService.listCodesByUserType(userType));
+    }
 }

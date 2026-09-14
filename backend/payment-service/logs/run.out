@@ -1,0 +1,24 @@
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+ :: Spring Boot ::                (v3.2.0)
+
+2026-09-14T15:11:58.844+08:00  INFO 29496 --- [payment-service] [           main] c.fazhitong.payment.PaymentApplication   : Starting PaymentApplication v1.0.0 using Java 21.0.12 with PID 29496 (D:\FAZHITONG\backend\payment-service\target\payment-service-1.0.0.jar started by 刘子轩 in D:\FAZHITONG\backend\payment-service)
+2026-09-14T15:11:58.851+08:00  INFO 29496 --- [payment-service] [           main] c.fazhitong.payment.PaymentApplication   : No active profile set, falling back to 1 default profile: "default"
+2026-09-14T15:12:03.561+08:00  INFO 29496 --- [payment-service] [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8087 (http)
+2026-09-14T15:12:03.590+08:00  INFO 29496 --- [payment-service] [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-09-14T15:12:03.591+08:00  INFO 29496 --- [payment-service] [           main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.16]
+2026-09-14T15:12:03.815+08:00  INFO 29496 --- [payment-service] [           main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2026-09-14T15:12:03.818+08:00  INFO 29496 --- [payment-service] [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 4778 ms
+Logging initialized using 'class org.apache.ibatis.logging.stdout.StdOutImpl' adapter.
+Initialization Sequence datacenterId:0 workerId:26
+ _ _   |_  _ _|_. ___ _ |    _ 
+| | |\/|_)(_| | |_\  |_)||_|_\ 
+     /               |         
+                        3.5.5 
+2026-09-14T15:12:06.016+08:00  INFO 29496 --- [payment-service] [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8087 (http) with context path ''
+2026-09-14T15:12:06.021+08:00  INFO 29496 --- [payment-service] [           main] c.fazhitong.payment.PaymentApplication   : Started PaymentApplication in 8.573 seconds (process running for 9.717)

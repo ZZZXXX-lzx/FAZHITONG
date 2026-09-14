@@ -95,4 +95,28 @@ public class RolePermissionService {
             }
         }
     }
+
+    /** 按用户类型返回其可见服务模块的权限码；ADMIN 返回全部 */
+    public List<String> listCodesByUserType(String userType) {
+        String roleCode = switch (userType == null ? "" : userType) {
+            case "LAWYER" -> "LAWYER";
+            case "ENTERPRISE" -> "ENTERPRISE_ADMIN";
+            case "USER" -> "USER";
+            case "ADMIN" -> null;
+            default -> "GUEST";
+        };
+        if (roleCode == null) { // ADMIN：全部权限码
+            return permissionMapper.selectList(null)
+                    .stream().map(Permission::getPermissionCode).toList();
+        }
+        Role role = roleMapper.selectOne(
+                new LambdaQueryWrapper<Role>().eq(Role::getRoleCode, roleCode));
+        if (role == null) return List.of();
+        List<Long> pids = rolePermissionMapper.selectList(
+                        new LambdaQueryWrapper<RolePermission>().eq(RolePermission::getRoleId, role.getId()))
+                .stream().map(RolePermission::getPermissionId).toList();
+        if (pids.isEmpty()) return List.of();
+        return permissionMapper.selectBatchIds(pids)
+                .stream().map(Permission::getPermissionCode).toList();
+    }
 }
