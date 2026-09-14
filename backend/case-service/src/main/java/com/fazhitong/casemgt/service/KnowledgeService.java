@@ -32,9 +32,9 @@ public class KnowledgeService {
     }
 
     /**
-     * 分页查询文章(status=1, categoryId可选, keyword模糊搜索title/summary/tags, orderByDesc isTop+createTime)
+     * 分页查询文章(status=1, categoryId可选, keyword模糊搜索title/summary/tags；sort=hot 按浏览量降序，默认置顶+时间倒序)
      */
-    public PageResult<KnowledgeArticle> listArticles(Long categoryId, String keyword, PageParam pageParam) {
+    public PageResult<KnowledgeArticle> listArticles(Long categoryId, String keyword, String sort, PageParam pageParam) {
         LambdaQueryWrapper<KnowledgeArticle> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(KnowledgeArticle::getStatus, 1);
         if (categoryId != null) {
@@ -46,8 +46,13 @@ public class KnowledgeService {
                     .or().like(KnowledgeArticle::getSummary, keyword)
                     .or().like(KnowledgeArticle::getTags, keyword));
         }
-        wrapper.orderByDesc(KnowledgeArticle::getIsTop)
-               .orderByDesc(KnowledgeArticle::getCreateTime);
+        if ("hot".equals(sort)) {
+            wrapper.orderByDesc(KnowledgeArticle::getViewCount)
+                   .orderByDesc(KnowledgeArticle::getCreateTime);
+        } else {
+            wrapper.orderByDesc(KnowledgeArticle::getIsTop)
+                   .orderByDesc(KnowledgeArticle::getCreateTime);
+        }
 
         Page<KnowledgeArticle> page = articleMapper.selectPage(
                 new Page<>(pageParam.getPage(), pageParam.getSize()), wrapper);
@@ -72,7 +77,7 @@ public class KnowledgeService {
      * 等同listArticles但固定categoryId
      */
     public PageResult<KnowledgeArticle> listArticlesByCategory(Long categoryId, PageParam pageParam) {
-        return listArticles(categoryId, null, pageParam);
+        return listArticles(categoryId, null, null, pageParam);
     }
 
     /**

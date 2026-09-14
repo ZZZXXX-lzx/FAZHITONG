@@ -56,6 +56,15 @@
         </div>
       </div>
 
+      <div class="seq-nav" v-if="seqList.length">
+        <el-button :disabled="!prevArticle" @click="goDetail(prevArticle.id)">
+          ← 上一篇：{{ prevArticle ? prevArticle.title : '没有了' }}
+        </el-button>
+        <el-button :disabled="!nextArticle" @click="goDetail(nextArticle.id)">
+          下一篇：{{ nextArticle ? nextArticle.title : '没有了' }} →
+        </el-button>
+      </div>
+
       <div class="back-btn">
         <el-button @click="$router.push('/knowledge')">返回知识库</el-button>
       </div>
@@ -66,7 +75,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { User, Document, View, Clock } from '@element-plus/icons-vue'
 import { knowledgeApi } from '@/api'
@@ -85,6 +94,7 @@ async function fetchArticle(id) {
     article.value = res
     if (res && res.categoryId) {
       fetchRelated(res.categoryId, id)
+      loadSeq(res.categoryId, id)
     }
   } catch {
     article.value = null
@@ -92,6 +102,24 @@ async function fetchArticle(id) {
     loading.value = false
   }
 }
+
+// 上一篇/下一篇：按同类文章时间倒序定位
+const seqList = ref([])
+const currentIdx = ref(-1)
+
+async function loadSeq(categoryId, currentId) {
+  try {
+    const res = await knowledgeApi.articles({ categoryId, page: 1, size: 50 })
+    seqList.value = res.list || []
+    currentIdx.value = seqList.value.findIndex(a => String(a.id) === String(currentId))
+  } catch {
+    seqList.value = []
+    currentIdx.value = -1
+  }
+}
+
+const prevArticle = computed(() => (currentIdx.value > 0 ? seqList.value[currentIdx.value - 1] : null))
+const nextArticle = computed(() => (currentIdx.value >= 0 && currentIdx.value < seqList.value.length - 1 ? seqList.value[currentIdx.value + 1] : null))
 
 async function fetchRelated(categoryId, currentId) {
   try {
@@ -225,6 +253,25 @@ onMounted(() => {
 }
 .back-btn {
   text-align: center;
+}
+.seq-nav {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+.seq-nav .el-button {
+  max-width: 46%;
+}
+.seq-nav .el-button span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+@media (max-width: 560px) {
+  .seq-nav { flex-direction: column; align-items: stretch; }
+  .seq-nav .el-button { max-width: 100%; }
 }
 @media (max-width: 768px) {
   .related-list {

@@ -10,50 +10,50 @@
         <div class="stats-cap">收录参考案例</div>
       </div>
       <div class="stats-col">
-        <div class="stats-title">热门案由</div>
+        <div class="stats-title">热门案由 <span class="stats-hint">点击下钻筛选</span></div>
         <div class="stats-chips">
-          <span v-for="c in stats?.causeTop || []" :key="c.name" class="chip" @click="quickSearch(c.name)">{{ c.name }} {{ c.count }}</span>
+          <span v-for="c in stats?.causeTop || []" :key="c.name" class="chip" :class="{ on: causeName === c.name }" @click="drillBy('causeName', c.name)">{{ c.name }} {{ c.count }}</span>
         </div>
       </div>
       <div class="stats-col">
         <div class="stats-title">常见受理法院</div>
         <div class="stats-chips">
-          <span v-for="c in stats?.courtTop || []" :key="c.name" class="chip" @click="quickCourt(c.name)">{{ c.name }} {{ c.count }}</span>
+          <span v-for="c in stats?.courtTop || []" :key="c.name" class="chip" :class="{ on: courtName === c.name }" @click="drillBy('courtName', c.name)">{{ c.name }} {{ c.count }}</span>
         </div>
       </div>
       <div class="stats-col">
         <div class="stats-title">年份分布</div>
         <div class="stats-chips">
-          <span v-for="c in stats?.yearDist || []" :key="c.name" class="chip chip-year">{{ c.name }} {{ c.count }}</span>
+          <span v-for="c in stats?.yearDist || []" :key="c.name" class="chip chip-year" :class="{ on: caseYear === c.name }" @click="drillBy('caseYear', c.name)">{{ c.name }} {{ c.count }}</span>
         </div>
       </div>
     </section>
     <el-card class="search-box">
-      <el-form :inline="true">
-        <el-form-item>
-          <el-input v-model="keyword" placeholder="搜索关键词（案由、法院、当事人等）" style="width:400px" clearable @clear="search" />
+      <el-form :inline="!mobile" class="case-form">
+        <el-form-item class="fld-keyword">
+          <el-input v-model="keyword" placeholder="搜索关键词（案由、法院、当事人等）" clearable @clear="search" />
         </el-form-item>
-        <el-form-item>
-          <el-input v-model="causeName" placeholder="案由" style="width:160px" clearable />
+        <el-form-item class="fld-xs">
+          <el-input v-model="causeName" placeholder="案由" clearable />
         </el-form-item>
-        <el-form-item>
-          <el-input v-model="courtName" placeholder="法院" style="width:160px" clearable />
+        <el-form-item class="fld-xs">
+          <el-input v-model="courtName" placeholder="法院" clearable />
         </el-form-item>
-        <el-form-item>
-          <el-select v-model="courtLevel" placeholder="法院层级" style="width:140px" clearable>
+        <el-form-item class="fld-m">
+          <el-select v-model="courtLevel" placeholder="法院层级" clearable>
             <el-option label="基层法院" value="BASE" />
             <el-option label="中级法院" value="INTERMEDIATE" />
             <el-option label="高级法院" value="HIGH" />
             <el-option label="最高法院" value="SUPREME" />
           </el-select>
         </el-form-item>
-        <el-form-item>
-          <el-input v-model="lawArticle" placeholder="法条（如 民法典577条）" style="width:200px" clearable />
+        <el-form-item class="fld-m">
+          <el-input v-model="lawArticle" placeholder="法条（如 民法典577条）" clearable />
         </el-form-item>
-        <el-form-item>
-          <el-input v-model="caseYear" placeholder="年份" style="width:120px" clearable />
+        <el-form-item class="fld-sm">
+          <el-input v-model="caseYear" placeholder="年份" clearable />
         </el-form-item>
-        <el-form-item>
+        <el-form-item class="fld-btn">
           <el-button type="primary" @click="search">检索</el-button>
         </el-form-item>
       </el-form>
@@ -64,7 +64,17 @@
         {{ ex.label }}
       </el-tag>
     </div>
-    <el-table :data="cases" stripe style="margin-top:20px" @row-click="showDetail">
+
+    <!-- 当前筛选条件（下钻） -->
+    <div v-if="activeFilters.length" class="filter-bar">
+      <span class="filter-label">筛选条件：</span>
+      <el-tag v-for="f in activeFilters" :key="f.field" closable type="primary" effect="plain" class="filter-tag" @close="removeFilter(f.field)">
+        {{ f.label }}：{{ f.value }}
+      </el-tag>
+      <el-button text type="primary" size="small" @click="clearAllFilters">清除全部</el-button>
+      <span class="filter-count">共 {{ total }} 条结果</span>
+    </div>
+    <el-table v-if="!mobile" :data="cases" stripe style="margin-top:20px" @row-click="showDetail">
       <el-table-column label="匹配度" width="100" align="center">
         <template #default="{ row }">
           <el-progress :percentage="matchPercent(row.score)" :stroke-width="12" :format="() => matchPercent(row.score) + '%'" />
@@ -88,8 +98,27 @@
         </template>
       </el-table-column>
     </el-table>
+
+    <!-- 移动端卡片列表 -->
+    <div v-else class="m-case-list">
+      <div v-for="row in cases" :key="row.id" class="m-case-card" @click="showDetail(row)">
+        <div class="m-card-top">
+          <span class="m-cause" v-html="highlightTerms(row.causeName)"></span>
+          <span class="m-badge">{{ matchPercent(row.score) }}%</span>
+        </div>
+        <div class="m-card-meta">
+          <span>{{ row.courtName }}</span>
+          <span>{{ row.caseYear }}</span>
+        </div>
+        <div class="m-snippet" v-html="snippet(row)"></div>
+        <el-tag v-if="row.judgmentResult" size="small" type="warning" effect="plain" class="m-result">
+          {{ row.judgmentResult }}
+        </el-tag>
+      </div>
+      <el-empty v-if="!loading && cases.length === 0" description="暂无匹配案例" />
+    </div>
     <el-pagination v-if="total > 0" background layout="prev, pager, next" :total="total" :page-size="size" @current-change="onPageChange" style="margin-top:20px;text-align:center" />
-    <el-dialog v-model="detailVisible" title="案例详情" width="800px">
+    <el-dialog v-model="detailVisible" title="案例详情" :width="mobile ? '94%' : '800px'">
       <template v-if="currentCase">
         <h3 v-html="highlightTerms(currentCase.causeName)"></h3>
         <p><strong>法院：</strong>{{ currentCase.courtName }} <strong>年份：</strong>{{ currentCase.caseYear }}</p>
@@ -129,8 +158,10 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { caseApi, regulationApi } from '@/api'
+import { isMobileDevice } from '@/utils/device'
 
 const router = useRouter()
+const mobile = ref(isMobileDevice())
 const stats = ref(null)
 const statsLoading = ref(false)
 const keyword = ref('')
@@ -143,6 +174,7 @@ const cases = ref([])
 const total = ref(0)
 const page = ref(1)
 const size = ref(20)
+const loading = ref(false)
 const detailVisible = ref(false)
 const currentCase = ref(null)
 const refLoading = ref(false)
@@ -226,6 +258,7 @@ function applyExample(ex) {
 
 async function search() {
   page.value = 1
+  loading.value = true
   try {
     const data = await caseApi.search({
       keyword: kw.value || undefined,
@@ -242,6 +275,8 @@ async function search() {
   } catch {
     cases.value = []
     total.value = 0
+  } finally {
+    loading.value = false
   }
 }
 
@@ -258,18 +293,44 @@ async function loadStats() {
   }
 }
 
-function quickSearch(name) {
-  keyword.value = name
-  causeName.value = ''
-  courtName.value = ''
-  caseYear.value = ''
+const filterLabels = { causeName: '案由', courtName: '法院', caseYear: '年份', keyword: '关键词' }
+
+/** 当前生效的下钻筛选条件（案由/法院/年份/关键词），渲染为可移除标签 */
+const activeFilters = computed(() => {
+  const out = []
+  const fields = [
+    { field: 'keyword', value: keyword.value?.trim() },
+    { field: 'causeName', value: causeName.value },
+    { field: 'courtName', value: courtName.value },
+    { field: 'caseYear', value: caseYear.value },
+  ]
+  for (const { field, value } of fields) {
+    if (value) out.push({ field, label: filterLabels[field], value })
+  }
+  return out
+})
+
+/** 点击统计面板 chip 下钻筛选；再点同级 chip 可取消 */
+function drillBy(field, value) {
+  if (field === 'causeName') causeName.value = causeName.value === value ? '' : value
+  else if (field === 'courtName') courtName.value = courtName.value === value ? '' : value
+  else if (field === 'caseYear') caseYear.value = caseYear.value === value ? '' : value
   search()
 }
 
-function quickCourt(name) {
-  courtName.value = name
-  keyword.value = ''
+function removeFilter(field) {
+  if (field === 'causeName') causeName.value = ''
+  else if (field === 'courtName') courtName.value = ''
+  else if (field === 'caseYear') caseYear.value = ''
+  else if (field === 'keyword') keyword.value = ''
+  search()
+}
+
+function clearAllFilters() {
+  causeName.value = ''
+  courtName.value = ''
   caseYear.value = ''
+  keyword.value = ''
   search()
 }
 
@@ -317,6 +378,22 @@ function matchPercent(score) {
 .page-header h2 { font-size: 24px; }
 .page-header p { color: #666; }
 .search-box { margin-bottom: 0; }
+.case-form .fld-keyword :deep(.el-input) { width: 400px; }
+.case-form .fld-xs :deep(.el-input) { width: 160px; }
+.case-form .fld-md :deep(.el-input), .case-form .fld-m :deep(.el-input) { width: 190px; }
+.case-form .fld-m :deep(.el-select) { width: 140px; }
+.case-form .fld-sm :deep(.el-input) { width: 120px; }
+/* 移动端卡片列表 */
+.m-case-list { display: flex; flex-direction: column; gap: 12px; margin-top: 20px; }
+.m-case-card { background: #fff; border: 1px solid #eef0f4; border-radius: 12px; padding: 14px 16px; cursor: pointer; transition: all .2s; }
+.m-case-card:active { background: #f6f9ff; }
+.m-card-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.m-cause { font-size: 15px; font-weight: 700; color: #1a3a8f; }
+.m-badge { flex: none; font-size: 12px; font-weight: 700; color: #e6a23c; background: #fdf6ec; border: 1px solid #f5dab1; border-radius: 12px; padding: 2px 8px; }
+.m-card-meta { display: flex; gap: 12px; margin: 8px 0 6px; color: #888; font-size: 12px; }
+.m-snippet { font-size: 13px; color: #444; line-height: 1.6; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.m-result { margin-top: 8px; }
+@media (max-width: 760px) { .stats-panel { flex-direction: column; gap: 18px; } .stats-chips { max-width: 100%; } .case-search { padding: 16px 12px; } .page-header h2 { font-size: 20px; } .case-form :deep(.el-form-item) { margin-bottom: 12px; } .case-form :deep(.el-input), .case-form :deep(.el-select) { width: 100% !important; } }
 .search-examples { margin-top: 12px; display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
 .example-label { font-size: 13px; color: #999; white-space: nowrap; }
 .example-tag { cursor: pointer; }
@@ -327,11 +404,15 @@ function matchPercent(score) {
 .stats-cap { font-size: 13px; opacity: .85; margin-top: 8px; }
 .stats-col { min-width: 0; }
 .stats-title { font-size: 13px; opacity: .9; margin-bottom: 10px; font-weight: 600; }
+.stats-hint { font-weight: 400; opacity: .7; font-size: 11px; margin-left: 4px; }
 .stats-chips { display: flex; flex-wrap: wrap; gap: 8px; max-width: 460px; }
 .chip { font-size: 12px; padding: 4px 10px; background: rgba(255,255,255,.16); border: 1px solid rgba(255,255,255,.3); border-radius: 14px; color: #fff; cursor: pointer; }
 .stats-col .chip:hover { background: #fff; color: #1a56db; }
-.chip-year { cursor: default; }
-@media (max-width: 760px) { .stats-panel { flex-direction: column; gap: 18px; } .stats-chips { max-width: 100%; } }
+.chip.on, .chip.on:hover { background: #ffd666; border-color: #ffd666; color: #1a3a8f; font-weight: 700; }
+.chip-year { cursor: pointer; }
+.filter-bar { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-top: 14px; padding: 10px 14px; background: #f6f9ff; border: 1px dashed #c6d4f7; border-radius: 10px; }
+.filter-label { font-size: 13px; color: #1a56db; font-weight: 600; white-space: nowrap; }
+.filter-count { margin-left: auto; font-size: 12px; color: #999; white-space: nowrap; }
 :deep(.highlight) { color: #e74c3c; font-weight: 700; background: #fff3cd; padding: 0 2px; border-radius: 2px; }
 .snippet { font-size: 13px; color: #444; line-height: 1.6; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
 .ref-tip { color: #999; font-size: 13px; padding: 6px 0; }

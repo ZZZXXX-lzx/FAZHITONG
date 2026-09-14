@@ -18,6 +18,10 @@
           <el-button @click="fetchArticles">搜索</el-button>
         </template>
       </el-input>
+      <div class="sort-tabs">
+        <span :class="{ active: sort === 'latest' }" @click="setSort('latest')">最新</span>
+        <span :class="{ active: sort === 'hot' }" @click="setSort('hot')">最热</span>
+      </div>
     </div>
 
     <div class="content-wrapper">
@@ -95,6 +99,7 @@ import { knowledgeApi } from '@/api'
 const router = useRouter()
 
 const keyword = ref('')
+const sort = ref('latest')
 const categories = ref([])
 const activeCategory = ref(0)
 const articles = ref([])
@@ -123,6 +128,7 @@ async function fetchArticles() {
     if (activeCategory.value && activeCategory.value !== 0) {
       params.categoryId = activeCategory.value
     }
+    if (sort.value) params.sort = sort.value
     const res = await knowledgeApi.articles(params)
     articles.value = res.list || []
     total.value = res.total || 0
@@ -136,6 +142,13 @@ async function fetchArticles() {
 
 function onCategorySelect(index) {
   activeCategory.value = Number(index)
+  page.value = 1
+  fetchArticles()
+}
+
+function setSort(value) {
+  if (sort.value === value) return
+  sort.value = value
   page.value = 1
   fetchArticles()
 }
@@ -185,7 +198,14 @@ onMounted(() => {
 }
 .search-bar {
   margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
 }
+.sort-tabs { display: flex; gap: 4px; background: #f2f3f5; border-radius: 8px; padding: 3px; }
+.sort-tabs span { font-size: 13px; padding: 5px 16px; border-radius: 6px; color: #555; cursor: pointer; transition: all .2s; }
+.sort-tabs span.active { background: #fff; color: #1a56db; font-weight: 600; box-shadow: 0 1px 3px rgba(0,0,0,.08); }
 .content-wrapper {
   display: flex;
   gap: 24px;

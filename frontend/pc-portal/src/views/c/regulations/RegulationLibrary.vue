@@ -80,7 +80,7 @@
     </section>
 
     <!-- 法规详情：目录式条文浏览 -->
-    <el-dialog v-model="detailOpen" :title="detail?.title" width="860px" top="5vh" destroy-on-close>
+    <el-dialog v-model="detailOpen" :title="detail?.title" :width="mobile ? '94%' : '860px'" top="5vh" destroy-on-close>
       <template v-if="detail">
         <div class="detail-meta">
           <el-tag size="small" :type="'primary'">{{ detail.lawType }}</el-tag>
@@ -100,10 +100,11 @@
         <div v-else-if="filteredArticles.length === 0" class="article-tip">暂未录入全文条文</div>
         <div v-else class="article-jump">
           <button
-            v-for="a in filteredArticles"
+            v-for="(a, i) in filteredArticles"
             :key="a.id"
             class="jump-chip"
-            @click="scrollToArticle(a.id)"
+            :class="{ active: i === activeIdx }"
+            @click="activateById(a.id)"
           >{{ a.articleNo }}</button>
         </div>
 
@@ -113,18 +114,26 @@
             <div class="article-body" v-html="highlightText(a.content)"></div>
           </div>
         </div>
+
+        <div v-if="filteredArticles.length" class="article-nav">
+          <button class="nav-btn" :disabled="activeIdx <= 0" @click="goArticle(activeIdx - 1)">‹ 上一条</button>
+          <span class="nav-pos">{{ activeIdx >= 0 ? activeIdx + 1 : '–' }} / {{ filteredArticles.length }}</span>
+          <button class="nav-btn" :disabled="activeIdx < 0 || activeIdx >= filteredArticles.length - 1" @click="goArticle(activeIdx + 1)">下一条 ›</button>
+        </div>
       </template>
     </el-dialog>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, nextTick } from 'vue'
+import { ref, computed, onMounted, nextTick, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { regulationApi } from '@/api'
+import { isMobileDevice } from '@/utils/device'
 
 const route = useRoute()
+const mobile = ref(isMobileDevice())
 
 const categoryTabs = [
   { label: '全部', value: '' },
@@ -294,13 +303,45 @@ function highlightClass(a) {
   return a.id === highlightedId.value ? 'article-item highlight' : 'article-item'
 }
 
+// ---------- 相邻条文翻页 ----------
+const activeIdx = ref(-1)
+
+/** 点击"条文目录"chips 或由高亮定位触发：按 id 找到其在过滤列表中的位置 */
+function activateById(id) {
+  const i = filteredArticles.value.findIndex(a => a.id === id)
+  if (i >= 0) {
+    activeIdx.value = i
+    scrollToArticle(id)
+  }
+}
+
+/** 上一条 / 下一条 */
+function goArticle(idx) {
+  if (idx < 0 || idx >= filteredArticles.value.length) return
+  activeIdx.value = idx
+  scrollToArticle(filteredArticles.value[idx].id)
+}
+
+/** 打开详情后跟随当前高亮条文同步激活状态 */
+function syncActive() {
+  activeIdx.value = highlightedId.value
+    ? filteredArticles.value.findIndex(a => a.id === highlightedId.value)
+    : -1
+}
+
 function scrollToArticle(id) {
   highlightedId.value = id
+  syncActive()
   nextTick(() => {
     const el = document.getElementById('art-' + id)
     if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
   })
 }
+
+// 在本法规内搜索过滤条文后，按高亮 id 重算当前翻页位置
+watch(filteredArticles, () => {
+  if (highlightedId.value) syncActive()
+})
 
 /** 由案例模块跳转而来：按 id 打开法规详情并定位到指定条文 */
 async function openById(id, articleNo) {
@@ -389,6 +430,12 @@ onMounted(() => {
 .article-jump { display: flex; flex-wrap: wrap; gap: 6px; max-height: 96px; overflow: auto; padding: 8px; background: #f6f7fb; border-radius: 8px; margin-bottom: 12px; }
 .jump-chip { font-size: 12px; padding: 3px 8px; border: 1px solid #dbe2f3; border-radius: 12px; background: #fff; color: #1a56db; cursor: pointer; }
 .jump-chip:hover { background: #1a56db; color: #fff; }
+.jump-chip.active, .jump-chip.active:hover { background: #f5a623; border-color: #f5a623; color: #fff; font-weight: 700; }
+.article-nav { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 14px; padding-top: 12px; border-top: 1px dashed #e0e3eb; }
+.nav-btn { padding: 7px 18px; border: 1px solid #c6d4f7; border-radius: 18px; background: #fff; color: #1a56db; font-size: 13px; cursor: pointer; transition: all .2s; }
+.nav-btn:hover:not(:disabled) { background: #1a56db; color: #fff; }
+.nav-btn:disabled { opacity: .4; cursor: not-allowed; }
+.nav-pos { font-weight: 700; color: #1a3a8f; font-size: 14px; }
 .article-list { max-height: 48vh; overflow-y: auto; border-top: 1px solid #eee; }
 .article-item { display: flex; gap: 14px; padding: 12px 2px; border-bottom: 1px solid #f0f0f0; }
 .article-item.highlight { background: #fff8e9; border-radius: 8px; padding: 12px 8px; box-shadow: inset 3px 0 0 #f5a623; }

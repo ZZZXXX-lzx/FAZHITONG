@@ -21,6 +21,8 @@ export const documentApi = {
   generate: (params) => request.post('/document/generate', params.data, { params: { userId: params.userId, templateId: params.templateId } }),
   records: (userId) => request.get('/document/records', { params: { userId } }),
   aiDraft: (type, description) => request.post('/document/ai-draft', { type, description }),
+  saveDraft: (payload) => request.post('/document/drafts', payload),
+  deleteRecord: (id, userId) => request.delete(`/document/records/${id}`, { params: { userId } }),
 }
 
 export const consultationApi = {

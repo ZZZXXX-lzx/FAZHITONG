@@ -11,6 +11,8 @@ public class DocumentRecord {
     private Long id;
     private Long userId;
     private Long templateId;
+    @TableField("doc_name")
+    private String docName;
     @TableField("`data`")
     private String data;
     private String fileUrl;

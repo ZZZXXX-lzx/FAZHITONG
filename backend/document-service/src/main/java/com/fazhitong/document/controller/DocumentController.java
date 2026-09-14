@@ -69,6 +69,26 @@ public class DocumentController {
     }
 
     /**
+     * 保存一条 AI 起草草稿为文书记录。
+     */
+    @PostMapping("/drafts")
+    public ApiResult<DocumentRecord> saveDraft(@RequestBody Map<String, String> body) {
+        Long userId = Long.valueOf(body.getOrDefault("userId", "0"));
+        String docName = body.getOrDefault("docName", "AI 起草文书");
+        String content = body.getOrDefault("content", "");
+        return ApiResult.success(documentService.saveDraft(userId, docName, content));
+    }
+
+    /**
+     * 删除一条本人生成的文书记录。
+     */
+    @DeleteMapping("/records/{id}")
+    public ApiResult<Void> deleteRecord(@PathVariable Long id, @RequestParam Long userId) {
+        boolean ok = documentService.deleteRecord(id, userId);
+        return ok ? ApiResult.success() : ApiResult.error("记录不存在或无权限删除");
+    }
+
+    /**
      * AI 文书起草（输入文书类型 + 需求描述，返回生成草稿）
      */
     @PostMapping("/ai-draft")

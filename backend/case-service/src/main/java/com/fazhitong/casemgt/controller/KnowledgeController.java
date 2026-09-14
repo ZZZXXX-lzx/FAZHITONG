@@ -33,8 +33,9 @@ public class KnowledgeController {
     public ApiResult<PageResult<KnowledgeArticle>> articles(
             @RequestParam(required = false) Long categoryId,
             @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) String sort,
             PageParam pageParam) {
-        return ApiResult.success(knowledgeService.listArticles(categoryId, keyword, pageParam));
+        return ApiResult.success(knowledgeService.listArticles(categoryId, keyword, sort, pageParam));
     }
 
     /**

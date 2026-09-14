@@ -77,10 +77,32 @@ public class DocumentService {
         DocumentRecord record = new DocumentRecord();
         record.setUserId(userId);
         record.setTemplateId(templateId);
+        record.setDocName(template.getName());
         record.setData(content);
         record.setStatus(1);
         recordMapper.insert(record);
         return record;
+    }
+
+    /**
+     * 保存一条 AI 起草草稿为文书记录（不入模板）。
+     */
+    public DocumentRecord saveDraft(Long userId, String docName, String content) {
+        DocumentRecord record = new DocumentRecord();
+        record.setUserId(userId);
+        record.setDocName(docName == null || docName.isBlank() ? "AI 起草文书" : docName);
+        record.setTemplateId(null);
+        record.setData(content);
+        record.setStatus(1);
+        recordMapper.insert(record);
+        return record;
+    }
+
+    public boolean deleteRecord(Long id, Long userId) {
+        int rows = recordMapper.delete(new LambdaQueryWrapper<DocumentRecord>()
+                .eq(DocumentRecord::getId, id)
+                .eq(DocumentRecord::getUserId, userId));
+        return rows > 0;
     }
 
     public List<DocumentRecord> myRecords(Long userId) {

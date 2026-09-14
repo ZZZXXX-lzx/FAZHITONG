@@ -5,18 +5,43 @@
       <p>常用法律费用计算工具，助力您快速估算</p>
     </div>
 
-    <div v-if="!activeTool" class="tool-grid">
-      <el-card
-        v-for="tool in tools"
-        :key="tool.key"
-        class="tool-card"
-        shadow="hover"
-        @click="activeTool = tool.key"
-      >
-        <el-icon :size="40" class="tool-icon"><component :is="tool.icon" /></el-icon>
-        <div class="tool-name">{{ tool.name }}</div>
-        <div class="tool-desc">{{ tool.desc }}</div>
-      </el-card>
+    <div v-if="!activeTool">
+      <!-- 智能助手 -->
+      <div class="tool-section">
+        <div class="section-title">智能法律助手（AI）</div>
+        <div class="tool-grid">
+          <el-card
+            v-for="tool in aiTools"
+            :key="tool.key"
+            class="tool-card ai-card"
+            shadow="hover"
+            @click="openAi(tool)"
+          >
+            <el-icon :size="40" class="tool-icon ai-icon"><component :is="tool.icon" /></el-icon>
+            <div class="tool-name">{{ tool.name }}</div>
+            <div class="tool-desc">{{ tool.desc }}</div>
+            <div class="ai-badge">AI</div>
+          </el-card>
+        </div>
+      </div>
+
+      <!-- 常用计算 -->
+      <div class="tool-section">
+        <div class="section-title">常用计算器</div>
+        <div class="tool-grid">
+          <el-card
+            v-for="tool in tools"
+            :key="tool.key"
+            class="tool-card"
+            shadow="hover"
+            @click="activeTool = tool.key"
+          >
+            <el-icon :size="40" class="tool-icon"><component :is="tool.icon" /></el-icon>
+            <div class="tool-name">{{ tool.name }}</div>
+            <div class="tool-desc">{{ tool.desc }}</div>
+          </el-card>
+        </div>
+      </div>
     </div>
 
     <div v-else class="tool-detail">
@@ -297,9 +322,16 @@
 
 <script setup>
 import { ref, reactive, computed } from 'vue'
-import { Coin, TrendCharts, Warning, Money } from '@element-plus/icons-vue'
+import { useRouter } from 'vue-router'
+import { Coin, TrendCharts, Warning, Money, MagicStick, OfficeBuilding } from '@element-plus/icons-vue'
 
+const router = useRouter()
 const activeTool = ref('')
+
+const aiTools = [
+  { key: 'litigation', name: '诉讼风险评估', desc: '输入案情，AI 智能分析诉前风险与胜诉要点', icon: MagicStick, path: '/toolbox/litigation' },
+  { key: 'dueDiligence', name: '企业尽职调查', desc: 'AI 生成企业法律尽调与合规风险报告', icon: OfficeBuilding, path: '/toolbox/due-diligence' },
+]
 
 const tools = [
   { key: 'litigation', name: '诉讼费计算器', desc: '按财产案件收费标准计算', icon: Coin },
@@ -307,6 +339,10 @@ const tools = [
   { key: 'injury', name: '工伤赔偿计算器', desc: '一次性伤残补助金计算', icon: Warning },
   { key: 'tax', name: '个税计算器', desc: '个人所得税计算', icon: Money },
 ]
+
+function openAi(tool) {
+  router.push(tool.path)
+}
 
 const currentToolName = computed(() => {
   const t = tools.find(t => t.key === activeTool.value)
@@ -594,6 +630,18 @@ function calcTax() {
   grid-template-columns: repeat(4, 1fr);
   gap: 20px;
 }
+.tool-section { margin-bottom: 28px; }
+.section-title { font-size: 15px; font-weight: 600; color: #1a1a2e; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+.section-title::before { content: ''; width: 4px; height: 16px; background: #1a56db; border-radius: 2px; }
+.ai-card { position: relative; border: 1px solid #e0e9ff; background: linear-gradient(135deg, #f5f8ff 0%, #ffffff 100%); }
+.ai-card:hover { border-color: #1a56db; }
+.ai-icon { color: #1a56db; }
+.ai-badge {
+  position: absolute; top: 12px; right: 12px;
+  font-size: 11px; font-weight: 700; color: #fff;
+  background: linear-gradient(135deg, #1a56db, #3b82f6);
+  padding: 2px 8px; border-radius: 10px; line-height: 1.4;
+}
 .tool-card {
   cursor: pointer;
   text-align: center;
@@ -737,6 +785,18 @@ function calcTax() {
 @media (max-width: 480px) {
   .tool-grid {
     grid-template-columns: 1fr;
+  }
+  .calc-card {
+    max-width: 100%;
+  }
+  .calc-card :deep(.el-input-number) {
+    width: 100% !important;
+  }
+  .calc-card :deep(.el-form-item__label) {
+    width: 90px !important;
+  }
+  .tool-detail {
+    padding: 0;
   }
 }
 </style>

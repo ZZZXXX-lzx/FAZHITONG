@@ -42,7 +42,8 @@
       <span class="legend-item"><i class="dot dot-domain"></i>法律领域</span>
       <span class="legend-item"><i class="dot dot-reg"></i>法律法规</span>
       <span class="legend-item"><i class="dot dot-concept"></i>法律概念</span>
-      <span class="legend-tip">· 拖拽节点调整位置 · 点击节点高亮关联关系</span>
+      <span v-if="stats" class="stats-line">节点 {{ stats.nodeCount }} · 关系 {{ stats.linkCount }} · 领域 {{ stats.domainCount }}</span>
+      <span class="legend-tip">· 拖拽节点调整位置 · 点击节点查看详情</span>
     </div>
 
     <div class="graph-card" v-loading="loading">
@@ -73,7 +74,9 @@
             class="node"
             :transform="`translate(${n.x},${n.y})`"
             @mousedown="startDrag(n, $event)"
-            @click="selectNode(n)"
+            @click="selectNode(n, $event)"
+            @mouseenter="showTooltip(n, $event)"
+            @mouseleave="hideTooltip"
           >
             <circle
               :r="nodeRadius(n)"
@@ -87,6 +90,30 @@
           </g>
         </g>
       </svg>
+
+      <!-- 悬停提示 -->
+      <div v-if="tooltip" class="kg-tooltip" :style="{ left: tooltip.left + '%', top: tooltip.top + '%' }">
+        <div class="tt-name">{{ tooltip.name }}</div>
+        <div class="tt-type">{{ tooltip.typeLabel }}</div>
+      </div>
+
+      <!-- 节点详情面板 -->
+      <div v-if="detailNode" class="node-panel">
+        <div class="panel-head">
+          <strong>{{ detailNode.name }}</strong>
+          <el-button link type="info" @click="closeDetail">✕ 关闭</el-button>
+        </div>
+        <div class="panel-type">
+          <el-tag size="small" :type="typeTag(detailNode.category)">{{ typeLabel(detailNode) }}</el-tag>
+          <el-tag v-if="detailNode.lawType" size="small" type="info" effect="plain">{{ detailNode.lawType }}</el-tag>
+        </div>
+        <div v-if="detailNode.lawType" class="panel-desc">该节点关联法规《{{ detailNode.name }}》（{{ detailNode.lawType }}），可前往法规库查看全文。</div>
+        <div class="panel-actions">
+          <el-button v-if="detailNode.refId" size="small" type="primary" @click="goRegulation">查看法条 →</el-button>
+          <el-button v-if="detailNode.category === 2" size="small" @click="searchConcept">检索该概念</el-button>
+          <el-button v-if="detailNode.category === 0" size="small" @click="switchDomain(detailNode.name)">查看该领域</el-button>
+        </div>
+      </div>
     </div>
 
     <!-- 检索结果 -->
@@ -118,8 +145,10 @@
 
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
+import { useRouter } from 'vue-router'
 import { knowledgeApi } from '@/api'
 
+const router = useRouter()
 const loading = ref(false)
 const nodes = ref([])
 const links = ref([])
@@ -128,31 +157,39 @@ const activeDomain = ref('')
 const keyword = ref('')
 const relatedResult = ref(null)
 const selectedId = ref(null)
+const stats = ref(null)
+const detailNode = ref(null)
+const tooltip = ref(null)
 
 const width = 1000
 const height = 620
 
+// 布局坐标缓存：切换选中/重算布局时保持节点稳定，避免随机重排
+const posStore = ref({})
 const layout = computed(() => computeLayout(nodes.value, links.value, selectedId.value))
+
+async function fetchGraph() {
+  loading.value = true
+  posStore.value = {}
+  try {
+    const res = await knowledgeApi.kgGraph(activeDomain.value || undefined)
+    nodes.value = res.nodes || []
+    links.value = res.links || []
+    stats.value = res.stats || null
+  } catch {
+    nodes.value = []
+    links.value = []
+    stats.value = null
+  } finally {
+    loading.value = false
+  }
+}
 
 async function fetchDomains() {
   try {
     domains.value = await knowledgeApi.kgDomains() || []
   } catch {
     domains.value = []
-  }
-}
-
-async function fetchGraph() {
-  loading.value = true
-  try {
-    const res = await knowledgeApi.kgGraph(activeDomain.value || undefined)
-    nodes.value = res.nodes || []
-    links.value = res.links || []
-  } catch {
-    nodes.value = []
-    links.value = []
-  } finally {
-    loading.value = false
   }
 }
 
@@ -188,6 +225,44 @@ const highlightIds = ref(new Set())
 
 function selectNode(n) {
   selectedId.value = selectedId.value === n.id ? null : n.id
+  detailNode.value = selectedId.value ? n : null
+}
+
+function closeDetail() {
+  detailNode.value = null
+  selectedId.value = null
+}
+
+function showTooltip(n) {
+  tooltip.value = {
+    name: n.name,
+    typeLabel: typeLabel(n),
+    left: (n.x / width) * 100,
+    top: (n.y / height) * 100,
+  }
+}
+function hideTooltip() { tooltip.value = null }
+
+function typeLabel(n) {
+  if (n.category === 0) return '法律领域'
+  if (n.category === 1) return '法律法规'
+  return '法律概念'
+}
+function typeTag(category) {
+  if (category === 0) return 'primary'
+  if (category === 1) return 'success'
+  return 'warning'
+}
+
+function goRegulation() {
+  if (detailNode.value && detailNode.value.refId) router.push(`/regulations?law=${detailNode.value.refId}`)
+}
+
+function searchConcept() {
+  if (!detailNode.value) return
+  keyword.value = detailNode.value.name
+  closeDetail()
+  searchRelated()
 }
 
 function nodeRadius(n) {
@@ -247,9 +322,10 @@ function computeLayout(rawNodes, rawLinks, selected) {
     .filter(l => byId[l.source] && byId[l.target])
     .map(l => ({ s: l.source, t: l.target, relation: l.relation }))
 
-  // 按 category 分层初始化，保证类型分区清晰
+  // 按 category 分层初始化（优先复用已缓存坐标，保持稳定）
   ns.forEach((n, i) => {
-    const cx = width / 2, cy = height / 2
+    const cached = posStore.value[n.id]
+    if (cached && n.x == null) { n.x = cached.x; n.y = cached.y; return }
     if (n.category === 0) {
       // 领域：顶部一排
       const gap = width / (ns.filter(x => x.category === 0).length + 1)
@@ -312,6 +388,7 @@ function computeLayout(rawNodes, rawLinks, selected) {
     x2: byId[l.t].x, y2: byId[l.t].y,
     source: l.s, target: l.t, relation: l.relation
   }))
+  ns.forEach(n => { posStore.value[n.id] = { x: n.x, y: n.y } })
   return { nodes: ns, links: linkViews }
 }
 
@@ -383,14 +460,47 @@ onBeforeUnmount(() => {
 .dot-domain { background: #409eff; }
 .dot-reg { background: #67c23a; }
 .dot-concept { background: #e6a23c; }
+.stats-line { color: #555; font-weight: 500; }
 .legend-tip { color: #999; margin-left: auto; }
 .graph-card {
+  position: relative;
   background: #fff;
   border-radius: 8px;
   padding: 16px;
   min-height: 500px;
   box-shadow: 0 2px 12px rgba(0,0,0,0.05);
 }
+.kg-tooltip {
+  position: absolute;
+  transform: translate(-50%, -130%);
+  background: rgba(48,49,51,.92);
+  color: #fff;
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-size: 12px;
+  pointer-events: none;
+  white-space: nowrap;
+  z-index: 5;
+}
+.kg-tooltip .tt-name { font-weight: 600; }
+.kg-tooltip .tt-type { opacity: .8; }
+.node-panel {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 280px;
+  background: #fff;
+  border: 1px solid #e4e7ed;
+  border-radius: 10px;
+  box-shadow: 0 6px 20px rgba(0,0,0,.1);
+  padding: 16px;
+  z-index: 6;
+}
+.panel-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.panel-head strong { font-size: 15px; }
+.panel-type { display: flex; gap: 6px; margin-bottom: 10px; }
+.panel-desc { color: #666; font-size: 13px; line-height: 1.6; margin-bottom: 12px; }
+.panel-actions { display: flex; gap: 8px; flex-wrap: wrap; }
 .empty { padding: 60px 0; }
 .kg-svg {
   width: 100%;
