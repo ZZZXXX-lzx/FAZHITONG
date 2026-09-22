@@ -3,7 +3,7 @@
     <header class="mobile-header">
       <div class="mh-logo" @click="$router.push('/')">
         <span class="mh-logo-icon">⚖️</span>
-        <span class="mh-logo-text">法智通</span>
+        <span class="mh-logo-text">{{ appStore.platformName }}</span>
       </div>
       <div class="mh-right">
         <el-badge :value="unreadCount" :hidden="unreadCount === 0" :max="99" v-if="userStore.isLoggedIn">
@@ -37,12 +37,14 @@
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useUserStore } from '@/store/user'
+import { useAppStore } from '@/store/app'
 import { Bell, HomeFilled, ChatDotRound, Document, User, Grid } from '@element-plus/icons-vue'
 import { notificationApi } from '@/api'
 
 const route = useRoute()
 const router = useRouter()
 const userStore = useUserStore()
+const appStore = useAppStore()
 const unreadCount = ref(0)
 
 const tabs = [

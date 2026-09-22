@@ -1,6 +1,7 @@
 package com.fazhitong.payment.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.fazhitong.common.dto.PageParam;
 import com.fazhitong.common.dto.PageResult;
@@ -13,7 +14,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.UUID;
 
 @Service
@@ -77,12 +81,44 @@ public class PaymentService {
         return PageResult.of(page.getRecords(), page.getTotal(), (int) page.getCurrent(), (int) page.getSize());
     }
 
-    public PageResult<Order> listAllOrders(PageParam pageParam) {
+    public PageResult<Order> listAllOrders(PageParam pageParam, Integer status) {
+        LambdaQueryWrapper<Order> qw = new LambdaQueryWrapper<Order>()
+                .orderByDesc(Order::getCreateTime);
+        if (status != null) {
+            qw.eq(Order::getStatus, status);
+        }
         Page<Order> page = orderMapper.selectPage(
-                new Page<>(pageParam.getPage(), pageParam.getSize()),
-                new LambdaQueryWrapper<Order>()
-                        .orderByDesc(Order::getCreateTime));
+                new Page<>(pageParam.getPage(), pageParam.getSize()), qw);
         return PageResult.of(page.getRecords(), page.getTotal(), (int) page.getCurrent(), (int) page.getSize());
+    }
+
+    /** 财务统计汇总：总收入、本月收入、订单总量及各状态数量 */
+    public Map<String, Object> stats() {
+        Map<String, Object> result = new LinkedHashMap<>();
+        result.put("totalIncome", sumPaidAmount(null));
+        result.put("monthIncome", sumPaidAmount(LocalDate.now().withDayOfMonth(1).atStartOfDay()));
+        result.put("totalOrders", orderMapper.selectCount(null));
+        result.put("pendingOrders", countByStatus(0));
+        result.put("paidOrders", countByStatus(1));
+        result.put("cancelledOrders", countByStatus(2));
+        return result;
+    }
+
+    private BigDecimal sumPaidAmount(LocalDateTime from) {
+        QueryWrapper<Order> qw = new QueryWrapper<Order>()
+                .select("COALESCE(SUM(amount),0) AS total")
+                .eq("status", 1);
+        if (from != null) {
+            qw.ge("pay_time", from);
+        }
+        Map<String, Object> row = orderMapper.selectMaps(qw).get(0);
+        Object v = row.values().iterator().next();
+        return v == null ? BigDecimal.ZERO : new BigDecimal(v.toString());
+    }
+
+    private long countByStatus(int status) {
+        return orderMapper.selectCount(
+                new LambdaQueryWrapper<Order>().eq(Order::getStatus, status));
     }
 
     public Member getMember(Long userId) {

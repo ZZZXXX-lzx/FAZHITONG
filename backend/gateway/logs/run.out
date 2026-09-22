@@ -7,23 +7,23 @@
  =========|_|==============|___/=/_/_/_/
  :: Spring Boot ::                (v3.2.0)
 
-2026-09-14T15:11:57.209+08:00  INFO 27832 --- [           main] c.fazhitong.gateway.GatewayApplication   : Starting GatewayApplication v1.0.0 using Java 21.0.12 with PID 27832 (D:\FAZHITONG\backend\gateway\target\gateway-1.0.0.jar started by 刘子轩 in D:\FAZHITONG\backend\gateway)
-2026-09-14T15:11:57.219+08:00 DEBUG 27832 --- [           main] c.fazhitong.gateway.GatewayApplication   : Running with Spring Boot v3.2.0, Spring v6.1.1
-2026-09-14T15:11:57.224+08:00  INFO 27832 --- [           main] c.fazhitong.gateway.GatewayApplication   : No active profile set, falling back to 1 default profile: "default"
-2026-09-14T15:12:00.065+08:00  INFO 27832 --- [           main] o.s.cloud.context.scope.GenericScope     : BeanFactory id=04f1234d-d769-30c7-948e-8e64244a32b3
-2026-09-14T15:12:02.950+08:00  INFO 27832 --- [           main] o.s.c.g.r.RouteDefinitionRouteLocator    : Loaded RoutePredicateFactory [After]
-2026-09-14T15:12:02.951+08:00  INFO 27832 --- [           main] o.s.c.g.r.RouteDefinitionRouteLocator    : Loaded RoutePredicateFactory [Before]
-2026-09-14T15:12:02.951+08:00  INFO 27832 --- [           main] o.s.c.g.r.RouteDefinitionRouteLocator    : Loaded RoutePredicateFactory [Between]
-2026-09-14T15:12:02.954+08:00  INFO 27832 --- [           main] o.s.c.g.r.RouteDefinitionRouteLocator    : Loaded RoutePredicateFactory [Cookie]
-2026-09-14T15:12:02.955+08:00  INFO 27832 --- [           main] o.s.c.g.r.RouteDefinitionRouteLocator    : Loaded RoutePredicateFactory [Header]
-2026-09-14T15:12:02.955+08:00  INFO 27832 --- [           main] o.s.c.g.r.RouteDefinitionRouteLocator    : Loaded RoutePredicateFactory [Host]
-2026-09-14T15:12:02.955+08:00  INFO 27832 --- [           main] o.s.c.g.r.RouteDefinitionRouteLocator    : Loaded RoutePredicateFactory [Method]
-2026-09-14T15:12:02.955+08:00  INFO 27832 --- [           main] o.s.c.g.r.RouteDefinitionRouteLocator    : Loaded RoutePredicateFactory [Path]
-2026-09-14T15:12:02.955+08:00  INFO 27832 --- [           main] o.s.c.g.r.RouteDefinitionRouteLocator    : Loaded RoutePredicateFactory [Query]
-2026-09-14T15:12:02.956+08:00  INFO 27832 --- [           main] o.s.c.g.r.RouteDefinitionRouteLocator    : Loaded RoutePredicateFactory [ReadBody]
-2026-09-14T15:12:02.956+08:00  INFO 27832 --- [           main] o.s.c.g.r.RouteDefinitionRouteLocator    : Loaded RoutePredicateFactory [RemoteAddr]
-2026-09-14T15:12:02.956+08:00  INFO 27832 --- [           main] o.s.c.g.r.RouteDefinitionRouteLocator    : Loaded RoutePredicateFactory [XForwardedRemoteAddr]
-2026-09-14T15:12:02.956+08:00  INFO 27832 --- [           main] o.s.c.g.r.RouteDefinitionRouteLocator    : Loaded RoutePredicateFactory [Weight]
-2026-09-14T15:12:02.956+08:00  INFO 27832 --- [           main] o.s.c.g.r.RouteDefinitionRouteLocator    : Loaded RoutePredicateFactory [CloudFoundryRouteService]
-2026-09-14T15:12:04.420+08:00  INFO 27832 --- [           main] o.s.b.web.embedded.netty.NettyWebServer  : Netty started on port 8080
-2026-09-14T15:12:04.687+08:00  INFO 27832 --- [           main] c.fazhitong.gateway.GatewayApplication   : Started GatewayApplication in 9.382 seconds (process running for 9.984)
+2026-09-22T12:30:48.141+08:00  INFO 33228 --- [           main] c.fazhitong.gateway.GatewayApplication   : Starting GatewayApplication v1.0.0 using Java 21.0.12 with PID 33228 (D:\FAZHITONG\backend\gateway\target\gateway-1.0.0.jar started by 刘子轩 in D:\FAZHITONG\backend\gateway)
+2026-09-22T12:30:48.145+08:00 DEBUG 33228 --- [           main] c.fazhitong.gateway.GatewayApplication   : Running with Spring Boot v3.2.0, Spring v6.1.1
+2026-09-22T12:30:48.146+08:00  INFO 33228 --- [           main] c.fazhitong.gateway.GatewayApplication   : No active profile set, falling back to 1 default profile: "default"
+2026-09-22T12:30:49.420+08:00  INFO 33228 --- [           main] o.s.cloud.context.scope.GenericScope     : BeanFactory id=04f1234d-d769-30c7-948e-8e64244a32b3
+2026-09-22T12:30:50.647+08:00  INFO 33228 --- [           main] o.s.c.g.r.RouteDefinitionRouteLocator    : Loaded RoutePredicateFactory [After]
+2026-09-22T12:30:50.649+08:00  INFO 33228 --- [           main] o.s.c.g.r.RouteDefinitionRouteLocator    : Loaded RoutePredicateFactory [Before]
+2026-09-22T12:30:50.649+08:00  INFO 33228 --- [           main] o.s.c.g.r.RouteDefinitionRouteLocator    : Loaded RoutePredicateFactory [Between]
+2026-09-22T12:30:50.649+08:00  INFO 33228 --- [           main] o.s.c.g.r.RouteDefinitionRouteLocator    : Loaded RoutePredicateFactory [Cookie]
+2026-09-22T12:30:50.650+08:00  INFO 33228 --- [           main] o.s.c.g.r.RouteDefinitionRouteLocator    : Loaded RoutePredicateFactory [Header]
+2026-09-22T12:30:50.650+08:00  INFO 33228 --- [           main] o.s.c.g.r.RouteDefinitionRouteLocator    : Loaded RoutePredicateFactory [Host]
+2026-09-22T12:30:50.650+08:00  INFO 33228 --- [           main] o.s.c.g.r.RouteDefinitionRouteLocator    : Loaded RoutePredicateFactory [Method]
+2026-09-22T12:30:50.651+08:00  INFO 33228 --- [           main] o.s.c.g.r.RouteDefinitionRouteLocator    : Loaded RoutePredicateFactory [Path]
+2026-09-22T12:30:50.651+08:00  INFO 33228 --- [           main] o.s.c.g.r.RouteDefinitionRouteLocator    : Loaded RoutePredicateFactory [Query]
+2026-09-22T12:30:50.651+08:00  INFO 33228 --- [           main] o.s.c.g.r.RouteDefinitionRouteLocator    : Loaded RoutePredicateFactory [ReadBody]
+2026-09-22T12:30:50.651+08:00  INFO 33228 --- [           main] o.s.c.g.r.RouteDefinitionRouteLocator    : Loaded RoutePredicateFactory [RemoteAddr]
+2026-09-22T12:30:50.652+08:00  INFO 33228 --- [           main] o.s.c.g.r.RouteDefinitionRouteLocator    : Loaded RoutePredicateFactory [XForwardedRemoteAddr]
+2026-09-22T12:30:50.653+08:00  INFO 33228 --- [           main] o.s.c.g.r.RouteDefinitionRouteLocator    : Loaded RoutePredicateFactory [Weight]
+2026-09-22T12:30:50.653+08:00  INFO 33228 --- [           main] o.s.c.g.r.RouteDefinitionRouteLocator    : Loaded RoutePredicateFactory [CloudFoundryRouteService]
+2026-09-22T12:30:51.588+08:00  INFO 33228 --- [           main] o.s.b.web.embedded.netty.NettyWebServer  : Netty started on port 8080
+2026-09-22T12:30:51.728+08:00  INFO 33228 --- [           main] c.fazhitong.gateway.GatewayApplication   : Started GatewayApplication in 5.027 seconds (process running for 5.675)

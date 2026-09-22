@@ -76,6 +76,7 @@ export const regulationApi = {
 
 export const paymentApi = {
   orders: (params) => request.get('/payment/admin/orders', { params }),
+  stats: () => request.get('/payment/admin/stats'),
 }
 
 export const knowledgeApi = {

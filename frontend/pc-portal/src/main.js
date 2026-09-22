@@ -21,4 +21,8 @@ for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
 import { useUserStore } from '@/store/user'
 useUserStore(pinia).loadPerms()
 
+// 应用启动时加载全局系统配置（平台名称、客服电话等），并写入页面标题
+import { useAppStore } from '@/store/app'
+useAppStore(pinia).loadConfig()
+
 app.mount('#app')

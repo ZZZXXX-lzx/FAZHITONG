@@ -7,7 +7,7 @@
         </button>
         <div class="logo" @click="$router.push('/')">
           <span class="logo-icon">⚖️</span>
-          <span class="logo-text">法智通</span>
+          <span class="logo-text">{{ appStore.platformName }}</span>
         </div>
         <nav class="main-nav" :class="{ open: menuOpen }">
           <router-link to="/" @click="menuOpen = false">首页</router-link>
@@ -58,7 +58,8 @@
     </main>
     <footer class="site-footer">
       <div class="footer-inner">
-        <p>© 2026 法智通 - 让每家企业都拥有自己的法务部</p>
+        <p>© 2026 {{ appStore.platformName }} - 让每家企业都拥有自己的法务部</p>
+        <p v-if="appStore.servicePhone" class="footer-phone">客服热线：{{ appStore.servicePhone }}</p>
       </div>
     </footer>
   </div>
@@ -68,11 +69,13 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/store/user'
+import { useAppStore } from '@/store/app'
 import { Bell, ArrowDown } from '@element-plus/icons-vue'
 import { notificationApi } from '@/api'
 
 const router = useRouter()
 const userStore = useUserStore()
+const appStore = useAppStore()
 const menuOpen = ref(false)
 const unreadCount = ref(0)
 
@@ -119,6 +122,7 @@ onMounted(() => {
 .site-main { flex: 1; background: #f5f7fa; }
 .site-footer { background: #1a1a2e; color: #999; text-align: center; padding: 24px; font-size: 13px; }
 .footer-inner { max-width: 1200px; margin: 0 auto; }
+.footer-phone { margin-top: 6px; color: #666; }
 
 .menu-toggle { display: none; background: none; border: none; padding: 8px; cursor: pointer; }
 

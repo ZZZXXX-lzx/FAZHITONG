@@ -29,7 +29,8 @@ public class JwtAuthFilter implements GlobalFilter, Ordered {
             "/api/document/",
             "/api/consultation/lawyer-service/lawyers",
             "/api/consultation/lawyer-service/prices",
-            "/api/user/review/"
+            "/api/user/review/",
+            "/api/user/system-config"
     );
 
     @Override

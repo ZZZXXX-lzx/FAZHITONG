@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/payment")
@@ -38,8 +39,14 @@ public class PaymentController {
     }
 
     @GetMapping("/admin/orders")
-    public ApiResult<PageResult<Order>> listAllOrders(PageParam pageParam) {
-        return ApiResult.success(paymentService.listAllOrders(pageParam));
+    public ApiResult<PageResult<Order>> listAllOrders(PageParam pageParam,
+            @RequestParam(required = false) Integer status) {
+        return ApiResult.success(paymentService.listAllOrders(pageParam, status));
+    }
+
+    @GetMapping("/admin/stats")
+    public ApiResult<Map<String, Object>> stats() {
+        return ApiResult.success(paymentService.stats());
     }
 
     @GetMapping("/member")

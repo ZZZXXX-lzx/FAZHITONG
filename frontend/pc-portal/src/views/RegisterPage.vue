@@ -1,7 +1,7 @@
 <template>
   <div class="register-page">
     <div class="register-card">
-      <h2 class="register-title">法智通注册</h2>
+      <h2 class="register-title">{{ appStore.platformName }}注册</h2>
       <el-form :model="form" :rules="rules" ref="formRef" size="large">
         <el-form-item prop="account">
           <el-input v-model="form.account" placeholder="请输入账号" prefix-icon="User" />
@@ -43,9 +43,11 @@ import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { authApi } from '@/api'
 import { useUserStore } from '@/store/user'
+import { useAppStore } from '@/store/app'
 
 const router = useRouter()
 const userStore = useUserStore()
+const appStore = useAppStore()
 const formRef = ref(null)
 const loading = ref(false)
 const form = reactive({ account: '', password: '', confirmPassword: '', nickname: '', phone: '', userType: 'USER' })

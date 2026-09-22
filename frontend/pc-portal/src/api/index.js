@@ -13,6 +13,7 @@ export const userApi = {
   delete: (id) => request.delete(`/user/${id}`),
   roles: () => request.get('/user/roles'),
   perms: () => request.get('/user/role/perms'),
+  systemConfig: () => request.get('/user/system-config'),
 }
 
 export const documentApi = {
