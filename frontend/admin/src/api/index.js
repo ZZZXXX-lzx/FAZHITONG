@@ -104,3 +104,6 @@ export const lawyerServiceApi = {
   accept: (id, remark) => request.post(`/consultation/lawyer-service/${id}/accept`, null, { params: { lawyerRemark: remark } }),
   finish: (id) => request.post(`/consultation/lawyer-service/${id}/finish`),
 }
+export const operationLogApi = {
+  list: (params) => request.get('/user/operation-log/list', { params }),
+}
