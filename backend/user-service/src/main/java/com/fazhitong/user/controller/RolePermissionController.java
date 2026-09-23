@@ -3,7 +3,9 @@ package com.fazhitong.user.controller;
 import com.fazhitong.common.dto.ApiResult;
 import com.fazhitong.user.entity.Permission;
 import com.fazhitong.user.entity.Role;
+import com.fazhitong.user.service.OperationLogService;
 import com.fazhitong.user.service.RolePermissionService;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,20 +18,39 @@ import java.util.Map;
 public class RolePermissionController {
 
     private final RolePermissionService rolePermissionService;
+    private final OperationLogService operationLogService;
 
     @PostMapping
-    public ApiResult<Role> create(@RequestBody Role role) {
-        return ApiResult.success(rolePermissionService.createRole(role));
+    public ApiResult<Role> create(@RequestBody Role role,
+            @RequestHeader(value = "X-Username", required = false) String username,
+            @RequestHeader(value = "X-User-Id", required = false) Long userId,
+            HttpServletRequest request) {
+        Role r = rolePermissionService.createRole(role);
+        operationLogService.log(userId, username, "新增角色 " + role.getRoleName(),
+                OperationLogService.clientIp(request), "成功");
+        return ApiResult.success(r);
     }
 
     @PutMapping
-    public ApiResult<Role> update(@RequestBody Role role) {
-        return ApiResult.success(rolePermissionService.updateRole(role));
+    public ApiResult<Role> update(@RequestBody Role role,
+            @RequestHeader(value = "X-Username", required = false) String username,
+            @RequestHeader(value = "X-User-Id", required = false) Long userId,
+            HttpServletRequest request) {
+        Role r = rolePermissionService.updateRole(role);
+        String name = role.getRoleName() != null ? role.getRoleName() : "ID=" + role.getId();
+        operationLogService.log(userId, username, "修改角色 " + name,
+                OperationLogService.clientIp(request), "成功");
+        return ApiResult.success(r);
     }
 
     @DeleteMapping("/{id}")
-    public ApiResult<Void> delete(@PathVariable Long id) {
+    public ApiResult<Void> delete(@PathVariable Long id,
+            @RequestHeader(value = "X-Username", required = false) String username,
+            @RequestHeader(value = "X-User-Id", required = false) Long userId,
+            HttpServletRequest request) {
         rolePermissionService.deleteRole(id);
+        operationLogService.log(userId, username, "删除角色 ID=" + id,
+                OperationLogService.clientIp(request), "成功");
         return ApiResult.success();
     }
 
@@ -44,8 +65,13 @@ public class RolePermissionController {
     }
 
     @PutMapping("/{id}/permissions")
-    public ApiResult<Void> assign(@PathVariable Long id, @RequestBody List<Long> permissionIds) {
+    public ApiResult<Void> assign(@PathVariable Long id, @RequestBody List<Long> permissionIds,
+            @RequestHeader(value = "X-Username", required = false) String username,
+            @RequestHeader(value = "X-User-Id", required = false) Long userId,
+            HttpServletRequest request) {
         rolePermissionService.assignPermissions(id, permissionIds);
+        operationLogService.log(userId, username, "分配角色权限 ID=" + id,
+                OperationLogService.clientIp(request), "成功");
         return ApiResult.success();
     }
 
